@@ -1,4 +1,4 @@
-main > #addPanel {
+.addBtn {
     display: flex;
     position: relative;
     width: 100%;
@@ -9,7 +9,7 @@ main > #addPanel {
     align-self: center;
     transition: all .3s ease;
 }
-    main > #addPanel::before {
+    .addBtn::before {
         content: "";
         position: absolute;
         width: 100%;
@@ -26,7 +26,7 @@ main > #addPanel {
         -webkit-mask-size: contain;
         mask-size: contain;
     }
-    main > #addPanel:hover {
+    .addBtn:hover {
         color: var(--blue);
         border-color: var(--blue);
     }

@@ -1,6 +1,15 @@
 /*>--------------- { Web Initialization } ---------------<*/
 document.addEventListener('DOMContentLoaded', async () => {
+    isHost = !(new URLSearchParams(window.location.search).get("data"));
+    new InstanceHandler(document.body.querySelector("main"));
 
+    /*>---------- [ Header Buttons ] ----------<*/
+    document.getElementById("dataDownload").addEventListener("click", () => {
+
+    });
+    document.getElementById("dataUpload").addEventListener("click", () => {
+
+    });
 });
 
 
