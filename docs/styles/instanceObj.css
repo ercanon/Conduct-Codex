@@ -30,3 +30,36 @@
         color: var(--blue);
         border-color: var(--blue);
     }
+
+main > section {
+    background-color: var(--sectionColor);
+    border: var(--spaceLyt) var(--sectionColor) solid;
+    border-radius: var(--spaceLyt);
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr min-content;
+    grid-template-rows: min-content 1fr;
+    grid-template-areas:
+        "title usage"
+        "content content";
+    gap: var(--spaceLyt);
+    width: 100%;
+}
+
+section > input {
+
+}
+.section-title{
+    grid-area: title;
+}
+.section-usage {
+    grid-area: usage;
+    text-align: right;
+    font-size: 1.2rem;
+}
+
+section > div {
+    grid-area: content;
+    background-color: var(--white);
+    border-radius: var(--spaceLyt);
+}
