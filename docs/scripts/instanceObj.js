@@ -1,3 +1,17 @@
+/*>--------------- { Web Initialization } ---------------<*/
+document.addEventListener('DOMContentLoaded', async () => {
+    isHost = !(new URLSearchParams(window.location.search).get("data"));
+    new InstanceHandler(document.body.querySelector("main"));
+
+    /*>---------- [ Header Buttons ] ----------<*/
+    document.getElementById("dataDownload").addEventListener("click", () => {
+
+    });
+    document.getElementById("dataUpload").addEventListener("click", () => {
+
+    });
+});
+
 class InstanceHandler {
     static #parserDOM = document.createRange()
     static #struc = [
@@ -10,7 +24,7 @@ class InstanceHandler {
             <input type="text" class="span-type" placeholder = "Entry Type">
          </span>`,
         `<div>
-            <iconify-icon></iconify-icon>
+            <iconify-icon icon="material-symbols:add-2-rounded" width="unset" height="unset"></iconify-icon>
             <input type="text" class="div-title" placeholder = "Title">
             <input type="text" class="div-sub" placeholder = "Subtitle">
          </div>`
@@ -22,12 +36,12 @@ class InstanceHandler {
 
         const newDOM = InstanceHandler.#parserDOM.createContextualFragment(InstanceHandler.#struc[lvlPrev]);
         const lvlNextDiv = newDOM.querySelector("section, span, div");
-        if (lvlNextDiv.localName === "section") {
+        if (lvlNextDiv?.localName === "section") {
             this.#sectionStyle = lvlNextDiv.style
             this.changeColor("black");
         }
 
-        if (lvlPrev < InstanceHandler.#struc.length -1) {
+        if (lvlPrev < InstanceHandler.#struc.length - 1) {
             lvlNextDiv?.insertAdjacentHTML("beforeend", InstanceHandler.#struc[0]);
             newDOM.querySelector("button")?.addEventListener("click", this.createStructure = () =>
                 new InstanceHandler(lvlNextDiv || parent, lvlPrev));
@@ -38,8 +52,8 @@ class InstanceHandler {
     changeColor(color) {
         this.#sectionStyle?.setProperty("--sectionColor", color);
     }
-    delete (){
-         parent.querySelectorAll("button")?.forEach((btn) => 
+    delete() {
+        parent.querySelectorAll("button")?.forEach((btn) =>
             btn.removeEventListener("click", this.createStructure));
     }
 }

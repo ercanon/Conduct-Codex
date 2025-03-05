@@ -2,7 +2,7 @@
     display: flex;
     position: relative;
     width: 100%;
-    height: 50px;
+    min-height: 40px;
     background: var(--white);
     border: 2px dashed var(--grey);
     color: var(--grey);
@@ -45,9 +45,14 @@ main > section {
     width: 100%;
 }
 
+section > input {
+    color: var(--white);
+    font-size: x-large;
+    font-weight: bold;
+}
 .section-usage {
     text-align: right;
-    font-size: 1.2rem;
+    font-size: larger;
 }
 
 section > button {
@@ -66,22 +71,31 @@ section > span {
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     grid-template-rows: min-content;
     gap: var(--tightSpaceLyt);
-    box-sizing: border-box;
-    word-wrap: break-word;
 }
 
 .span-type {
     grid-column: 1/-1;
+    font-size: medium;
 }
 
 
 
 span > div {
     display: grid;
-    grid-template-columns: min-content;
+    grid-template-columns: min-content 1fr;
     grid-template-rows: min-content;
+    column-gap: var(--tightSpaceLyt);
 }
 
 div > iconify-icon {
     grid-row: span 2;
+    aspect-ratio: 1 / 1;
+    height: 40px;
+    color: var(--white);
+    background-color: var(--sectionColor);
+}
+
+.div-title {
+    font-size: large;
+    font-weight: bold;
 }

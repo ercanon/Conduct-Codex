@@ -26,9 +26,8 @@ button {
 }
 
 input {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--white);
+    font-size: medium;
+    color: var(--colorSection);
     border: none;
     background: none;
     width: 100%;
