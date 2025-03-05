@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 event.target.innerText = "Edit Mode";
                 event.target.setAttribute("data-mode", "edit");
 
-                Array.from(document.getElementsByClassName("editorMode")).forEach((el) =>
+                Array.from(document.getElementsByClassName("selectorStructBtn")).forEach((el) =>
                     el.classList.remove("hide"));
                 Array.from(document.getElementsByClassName("addStructBtn")).forEach((el) =>
                     el.classList.add("hide"));
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 event.target.innerText = "Preview Mode";
                 event.target.setAttribute("data-mode", "preview");
 
-                Array.from(document.getElementsByClassName("editorMode")).forEach((el) =>
+                Array.from(document.getElementsByClassName("selectorStructBtn")).forEach((el) =>
                     el.classList.add("hide"));
                 break;
             case "Preview Mode":
@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 class InstanceHandler {
-    static #parserDOM = document.createRange()
     static #struc = [
         `<button class="addStructBtn"></button>`,
         `<section class="dynStruct">
@@ -60,32 +59,48 @@ class InstanceHandler {
             <input type="text" class="div-sub" placeholder = "Subtitle">
          </div>`
     ];
-    #sectionStyle = null;
+    static #parserDOM = document.createRange()
+    static #selectedStruc = null;
     constructor(parent, lvlPrev = -1) {
         if (++lvlPrev >= InstanceHandler.#struc.length)
             return console.warn("Structure Array has reached its limit");
 
         const newDOM = InstanceHandler.#parserDOM.createContextualFragment(InstanceHandler.#struc[lvlPrev]);
         const lvlNextDiv = newDOM.querySelector(".dynStruct");
-        if (lvlNextDiv?.localName === "section") {
-            this.#sectionStyle = lvlNextDiv.style
-            this.changeColor("black");
+        if (lvlNextDiv) {
+            if (lvlNextDiv.localName === "section")
+                InstanceHandler.changeColor(lvlNextDiv, "black");
+
+            lvlNextDiv.insertAdjacentHTML("afterbegin", `<button class="selectorStructBtn hide"></button>`);
+            newDOM.querySelector(".selectorStructBtn")?.addEventListener("click", this.selectStruct = (event) => {
+                InstanceHandler.#selectedStruc?.classList.remove("selected");
+
+                if (InstanceHandler.#selectedStruc === event.target)
+                    return InstanceHandler.#selectedStruc = null;
+                
+                InstanceHandler.#selectedStruc = event.target;
+                event.target.classList.add("selected");
+            });
         }
-        lvlNextDiv?.insertAdjacentHTML("afterbegin", `<span class="editorMode hide"></span>`);
 
         if (lvlPrev < InstanceHandler.#struc.length - 1) {
             lvlNextDiv?.insertAdjacentHTML("beforeend", InstanceHandler.#struc[0]);
-            newDOM.querySelector(".addStructBtn")?.addEventListener("click", this.createStructure = () =>
+            newDOM.querySelector(".addStructBtn")?.addEventListener("click", this.createStruct = () =>
                 new InstanceHandler(lvlNextDiv || parent, lvlPrev));
         }
 
         parent.insertBefore(newDOM, parent.lastChild);
     }
-    changeColor(color) {
-        this.#sectionStyle?.setProperty("--sectionColor", color);
+    static changeColor(element, color) {
+        (element.localName === "section" ?
+            element :
+            element.closest("section"))
+        .style.setProperty("--sectionColor", color);
     }
     delete() { //TODO
         parent.querySelectorAll(".addStructBtn")?.forEach((btn) =>
-            btn.removeEventListener("click", this.createStructure));
+            btn.removeEventListener("click", this.createStruct));
+        parent.querySelectorAll(".selectorStructBtn")?.forEach((btn) =>
+            btn.removeEventListener("click", this.selectStruct));
     }
 }

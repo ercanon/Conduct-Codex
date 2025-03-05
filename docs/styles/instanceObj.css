@@ -1,38 +1,4 @@
-.addStructBtn {
-    display: flex;
-    position: relative;
-    width: 100%;
-    min-height: 40px;
-    background: var(--white);
-    border: 2px dashed var(--grey);
-    color: var(--grey);
-    align-self: center;
-    transition: all .3s ease;
-}
-    .addStructBtn::before {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        transition: background-color .3s ease;
-        background-color: currentColor;
-        --mask-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 21q-.425 0-.712-.288T11 20v-7H4q-.425 0-.712-.288T3 12t.288-.712T4 11h7V4q0-.425.288-.712T12 3t.713.288T13 4v7h7q.425 0 .713.288T21 12t-.288.713T20 13h-7v7q0 .425-.288.713T12 21'/%3E%3C/svg%3E");
-        -webkit-mask-image: var(--mask-url);
-        mask-image: var(--mask-url);
-        -webkit-mask-repeat: no-repeat;
-        mask-repeat: no-repeat;
-        -webkit-mask-position: center;
-        mask-position: center;
-        -webkit-mask-size: contain;
-        mask-size: contain;
-    }
-    .addStructBtn:hover {
-        color: var(--blue);
-        border-color: var(--blue);
-    }
-
-
-
+/*>--------------- { Structure } ---------------<*/
 .dynStruct {
     position: relative;
     display: grid;
@@ -88,7 +54,11 @@ article.dynStruct {
 div.dynStruct {
     grid-template-columns: min-content 1fr;
     column-gap: var(--tightSpaceLyt);
+    transition: box-shadow 0.3s ease;
 }
+    div.dynStruct:hover {
+        box-shadow: var(--sectionColor) -2px 2px 3px 0px;
+    }
 
 div.dynStruct > iconify-icon {
     grid-row: span 2;
@@ -104,19 +74,62 @@ div.dynStruct > iconify-icon {
 }
 
 
-.editorMode {
+
+/*>--------------- { Add Mode } ---------------<*/
+.addStructBtn {
+    display: flex;
+    position: relative;
+    width: 100%;
+    min-height: 40px;
+    background: var(--white);
+    border: 2px dashed var(--grey);
+    color: var(--grey);
+    align-self: center;
+    transition: all .3s ease;
+}
+
+    .addStructBtn::before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transition: background-color .3s ease;
+        background-color: currentColor;
+        --mask-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 21q-.425 0-.712-.288T11 20v-7H4q-.425 0-.712-.288T3 12t.288-.712T4 11h7V4q0-.425.288-.712T12 3t.713.288T13 4v7h7q.425 0 .713.288T21 12t-.288.713T20 13h-7v7q0 .425-.288.713T12 21'/%3E%3C/svg%3E");
+        -webkit-mask-image: var(--mask-url);
+        mask-image: var(--mask-url);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+    }
+
+    .addStructBtn:hover {
+        color: var(--blue);
+        border-color: var(--blue);
+    }
+
+
+
+/*>--------------- { Edit Mode } ---------------<*/
+.selectorStructBtn {
     position: absolute;
     width: 100%;
     height: 100%;
-    opacity: 0;
+    background: none;
     transition: background-color .3s ease;
+    z-index: 500;
 }
-    .editorMode:hover {
+    .selectorStructBtn:hover {
         background-color: var(--blue);
         opacity: .4;
     }
 
-.editorMode {
-    z-index: 500;
-    border-radius: var(--tightSpaceLyt);
+
+
+/*>--------------- { Dinamic Class } ---------------<*/
+.selected {
+    border: 4px solid var(--gold);
 }
