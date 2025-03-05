@@ -1,4 +1,4 @@
-.addBtn {
+.addStructBtn {
     display: flex;
     position: relative;
     width: 100%;
@@ -9,7 +9,7 @@
     align-self: center;
     transition: all .3s ease;
 }
-    .addBtn::before {
+    .addStructBtn::before {
         content: "";
         position: absolute;
         width: 100%;
@@ -26,26 +26,33 @@
         -webkit-mask-size: contain;
         mask-size: contain;
     }
-    .addBtn:hover {
+    .addStructBtn:hover {
         color: var(--blue);
         border-color: var(--blue);
     }
 
 
 
-main > section {
+.dynStruct {
+    position: relative;
+    display: grid;
+    grid-template-rows: min-content;
+    box-sizing: border-box;
+}
+
+
+
+section.dynStruct {
     background-color: var(--sectionColor);
     border: var(--spaceLyt) var(--sectionColor) solid;
     border-radius: var(--spaceLyt);
     box-sizing: border-box;
-    display: grid;
     grid-template-columns: 1fr min-content;
-    grid-template-rows: min-content;
     gap: var(--tightSpaceLyt);
     width: 100%;
 }
 
-section > input {
+section.dynStruct > input {
     color: var(--white);
     font-size: x-large;
     font-weight: bold;
@@ -55,39 +62,34 @@ section > input {
     font-size: larger;
 }
 
-section > button {
+section.dynStruct > .addStructBtn {
     grid-column: span 2;
 }
 
 
 
-section > span {
+article.dynStruct {
     grid-column: span 2;
     background-color: var(--white);
     border-radius: var(--spaceLyt);
     padding: var(--tightSpaceLyt);
-    box-sizing: border-box;
-    display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    grid-template-rows: min-content;
     gap: var(--tightSpaceLyt);
 }
 
-.span-type {
+.article-type {
     grid-column: 1/-1;
     font-size: medium;
 }
 
 
 
-span > div {
-    display: grid;
+div.dynStruct {
     grid-template-columns: min-content 1fr;
-    grid-template-rows: min-content;
     column-gap: var(--tightSpaceLyt);
 }
 
-div > iconify-icon {
+div.dynStruct > iconify-icon {
     grid-row: span 2;
     aspect-ratio: 1 / 1;
     height: 40px;
@@ -98,4 +100,13 @@ div > iconify-icon {
 .div-title {
     font-size: large;
     font-weight: bold;
+}
+
+
+.editorMode {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--blue);
+    opacity: .5;
 }

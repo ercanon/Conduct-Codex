@@ -4,10 +4,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     new InstanceHandler(document.body.querySelector("main"));
 
     /*>---------- [ Header Buttons ] ----------<*/
-    document.getElementById("dataDownload").addEventListener("click", () => {
+    document.getElementById("toggleMode").addEventListener("click", (event) => {
+        switch (event.target.innerText) {
+            case "Add Mode":
+                event.target.innerText = "Edit Mode";
+                event.target.setAttribute("data-mode", "edit"); 
 
+                Array.from(document.getElementsByClassName("editorMode")).forEach((el) =>
+                    el.classList.remove("hide"));
+                Array.from(document.getElementsByClassName("addStructBtn")).forEach((el) =>
+                    el.classList.add("hide"));
+                break;
+            case "Edit Mode":
+                event.target.innerText = "Preview Mode";
+                event.target.setAttribute("data-mode", "preview"); 
+
+                Array.from(document.getElementsByClassName("editorMode")).forEach((el) =>
+                    el.classList.add("hide"));
+                break;
+            case "Preview Mode":
+                event.target.innerText = "Add Mode";
+                event.target.setAttribute("data-mode", "add"); 
+
+                Array.from(document.getElementsByClassName("addStructBtn")).forEach((el) =>
+                    el.classList.remove("hide"));
+                break;
+        }
     });
     document.getElementById("dataUpload").addEventListener("click", () => {
+
+    });
+    document.getElementById("dataDownload").addEventListener("click", () => {
 
     });
 });
@@ -15,15 +42,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 class InstanceHandler {
     static #parserDOM = document.createRange()
     static #struc = [
-        `<button class="addBtn"></button>`,
-        `<section>
+        `<button class="addStructBtn"></button>`,
+        `<section class="dynStruct">
             <input type="text" class="section-title" placeholder = "Title">
             <input type="text" class="section-usage" placeholder = "Usage">
          </section>`,
-        `<span>
-            <input type="text" class="span-type" placeholder = "Entry Type">
-         </span>`,
-        `<div>
+        `<article class="dynStruct">
+            <input type="text" class="article-type" placeholder = "Entry Type">
+         </article>`,
+        `<div class="dynStruct">
             <iconify-icon icon="material-symbols:add-2-rounded" width="unset" height="unset"></iconify-icon>
             <input type="text" class="div-title" placeholder = "Title">
             <input type="text" class="div-sub" placeholder = "Subtitle">
@@ -35,15 +62,18 @@ class InstanceHandler {
             return console.warn("Structure Array has reached its limit");
 
         const newDOM = InstanceHandler.#parserDOM.createContextualFragment(InstanceHandler.#struc[lvlPrev]);
-        const lvlNextDiv = newDOM.querySelector("section, span, div");
+        const lvlNextDiv = newDOM.querySelector(".dynStruct");
         if (lvlNextDiv?.localName === "section") {
             this.#sectionStyle = lvlNextDiv.style
             this.changeColor("black");
         }
 
         if (lvlPrev < InstanceHandler.#struc.length - 1) {
-            lvlNextDiv?.insertAdjacentHTML("beforeend", InstanceHandler.#struc[0]);
-            newDOM.querySelector("button")?.addEventListener("click", this.createStructure = () =>
+            if (lvlNextDiv) {
+                lvlNextDiv.insertAdjacentHTML("beforeend", InstanceHandler.#struc[0]);
+                lvlNextDiv.insertAdjacentHTML("afterbegin", `<span class="editorMode hide"></span>`);
+            }
+            newDOM.querySelector(".addStructBtn")?.addEventListener("click", this.createStructure = () =>
                 new InstanceHandler(lvlNextDiv || parent, lvlPrev));
         }
 
@@ -52,8 +82,8 @@ class InstanceHandler {
     changeColor(color) {
         this.#sectionStyle?.setProperty("--sectionColor", color);
     }
-    delete() {
-        parent.querySelectorAll("button")?.forEach((btn) =>
+    delete() { //TODO
+        parent.querySelectorAll(".addStructBtn")?.forEach((btn) =>
             btn.removeEventListener("click", this.createStructure));
     }
 }
