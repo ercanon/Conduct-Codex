@@ -38,18 +38,19 @@
     display: grid;
     grid-template-rows: min-content;
     box-sizing: border-box;
+    transition: all .3s ease;
 }
 
 
 
 section.dynStruct {
     background-color: var(--sectionColor);
-    border: var(--spaceLyt) var(--sectionColor) solid;
+    padding: var(--spaceLyt);
     border-radius: var(--spaceLyt);
-    box-sizing: border-box;
     grid-template-columns: 1fr min-content;
     gap: var(--tightSpaceLyt);
     width: 100%;
+    z-index: 100;
 }
 
 section.dynStruct > input {
@@ -107,6 +108,15 @@ div.dynStruct > iconify-icon {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: var(--blue);
-    opacity: .5;
+    opacity: 0;
+    transition: background-color .3s ease;
+}
+    .editorMode:hover {
+        background-color: var(--blue);
+        opacity: .4;
+    }
+
+.editorMode {
+    z-index: 500;
+    border-radius: var(--tightSpaceLyt);
 }

@@ -1,14 +1,18 @@
 /*>--------------- { Web Initialization } ---------------<*/
 document.addEventListener('DOMContentLoaded', async () => {
     isHost = !(new URLSearchParams(window.location.search).get("data"));
+
+    if (!isHost)
+        return document.body.querySelector("header > buttons").forEach((btn) =>
+            btn.remove());
+
     new InstanceHandler(document.body.querySelector("main"));
 
-    /*>---------- [ Header Buttons ] ----------<*/
     document.getElementById("toggleMode").addEventListener("click", (event) => {
         switch (event.target.innerText) {
             case "Add Mode":
                 event.target.innerText = "Edit Mode";
-                event.target.setAttribute("data-mode", "edit"); 
+                event.target.setAttribute("data-mode", "edit");
 
                 Array.from(document.getElementsByClassName("editorMode")).forEach((el) =>
                     el.classList.remove("hide"));
@@ -17,14 +21,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 break;
             case "Edit Mode":
                 event.target.innerText = "Preview Mode";
-                event.target.setAttribute("data-mode", "preview"); 
+                event.target.setAttribute("data-mode", "preview");
 
                 Array.from(document.getElementsByClassName("editorMode")).forEach((el) =>
                     el.classList.add("hide"));
                 break;
             case "Preview Mode":
                 event.target.innerText = "Add Mode";
-                event.target.setAttribute("data-mode", "add"); 
+                event.target.setAttribute("data-mode", "add");
 
                 Array.from(document.getElementsByClassName("addStructBtn")).forEach((el) =>
                     el.classList.remove("hide"));
@@ -67,12 +71,10 @@ class InstanceHandler {
             this.#sectionStyle = lvlNextDiv.style
             this.changeColor("black");
         }
+        lvlNextDiv?.insertAdjacentHTML("afterbegin", `<span class="editorMode hide"></span>`);
 
         if (lvlPrev < InstanceHandler.#struc.length - 1) {
-            if (lvlNextDiv) {
-                lvlNextDiv.insertAdjacentHTML("beforeend", InstanceHandler.#struc[0]);
-                lvlNextDiv.insertAdjacentHTML("afterbegin", `<span class="editorMode hide"></span>`);
-            }
+            lvlNextDiv?.insertAdjacentHTML("beforeend", InstanceHandler.#struc[0]);
             newDOM.querySelector(".addStructBtn")?.addEventListener("click", this.createStructure = () =>
                 new InstanceHandler(lvlNextDiv || parent, lvlPrev));
         }
