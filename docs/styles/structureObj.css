@@ -114,15 +114,16 @@ div.dynStruct > iconify-icon {
 
 
 /*>--------------- { Edit Mode } ---------------<*/
-.selectorStructBtn {
+.selectStructBtn {
     position: absolute;
     width: 100%;
     height: 100%;
     background: none;
     transition: background-color .3s ease;
+    cursor: grab;
     z-index: 500;
 }
-    .selectorStructBtn:hover {
+    .selectStructBtn:hover {
         background-color: var(--blue);
         opacity: .4;
     }
@@ -130,6 +131,15 @@ div.dynStruct > iconify-icon {
 
 
 /*>--------------- { Dinamic Class } ---------------<*/
-.selected {
+.selectedStruct {
     border: 4px solid var(--gold);
+}
+
+.drop-indicator {
+    position: fixed;
+    height: 2px;
+    background-color: #007bff; /* Color de la línea */
+    display: none; /* Ocultar por defecto */
+    pointer-events: none; /* Evitar que interfiera con eventos del mouse */
+    z-index: 1000; /* Asegurar que esté por encima de otros elementos */
 }

@@ -93,16 +93,16 @@ header > button {
     padding-inline: var(--spaceLyt);
     color: var(--white);
 }
-#toggleMode[data-mode="add"] {
+#toggleMode[data-mode="edit"] {
     background-color: var(--green);
 }
-    #toggleMode[data-mode="add"]:hover {
+    #toggleMode[data-mode="edit"]:hover {
         background-color: var(--greenHvr);
     }
-#toggleMode[data-mode="edit"] {
+#toggleMode[data-mode="arrange"] {
     background-color: var(--gold);
 }
-    #toggleMode[data-mode="edit"]:hover {
+    #toggleMode[data-mode="arrange"]:hover {
         background-color: var(--goldHvr);
     }
 #toggleMode[data-mode="preview"] {
