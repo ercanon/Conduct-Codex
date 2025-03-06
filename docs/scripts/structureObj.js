@@ -64,7 +64,6 @@ class StructureHandler {
          </div>`
     ];
     static #parserDOM = document.createRange();
-    static #selectedStruc = null;
 
     static createStruct(event) {
         /*>---------- [ Initialitation ] ----------<*/
@@ -84,9 +83,9 @@ class StructureHandler {
             if (lvlPrev < StructureHandler.#structArray.length - 1)
                 dynStruct.insertAdjacentHTML("beforeend", StructureHandler.#structArray[0]);
             if (dynStruct.localName === "section")
-                StructureHandler.changeColor(dynStruct, "black");
+                StructureHandler.#changeColor(dynStruct, "black");
 
-            //new HoverHandeler();
+            HoverHandeler.prepareHover(dynStruct);
         }
 
         /*>---------- [ Add Button Action ] ----------<*/
@@ -95,54 +94,62 @@ class StructureHandler {
         /*>---------- [ Insert into HTML ] ----------<*/
         parent.insertBefore(newDOM, parent.lastChild);
     }
-    static changeColor(element, color) {
+    static #changeColor(element, color) {
         element.closest("section").style.setProperty("--sectionColor", color);
     }
-    static delete(event) {
-        event.target.querySelectorAll(".addStructBtn")?.forEach((btn) =>
+    static #delete(event) {
+        const target = event.target.closest(".dynStruct");
+        target.querySelectorAll(".addStructBtn")?.forEach((btn) =>
             btn.removeEventListener("click", this.createStruct));
-        event.target.querySelectorAll(".selectStructBtn")?.forEach((btn) => {
-            btn.removeEventListener("mousedown", StructureHandler.selectStruct);
-            btn.removeEventListener("dragover", StructureHandler.dragOver);
-            btn.removeEventListener("drop", StructureHandler.dragDrop);
-        });      
+        HoverHandeler.delete(target);
     }
 }
 
-//class HoverHandeler {
+class HoverHandeler {
+    static #selectedStruc = null;
+    static #targetElem = null;
 
-//    constructor() {
-//        dynStruct.insertAdjacentHTML("afterbegin", `<button class="selectStructBtn hide"></button>`);
-//        const selectorBtn = dynStruct.querySelector(".selectStructBtn");
-//        if (selectorBtn) {
-//            selectorBtn.addEventListener("mousedown", StructureHandler.selectStruct);
-//            selectorBtn.addEventListener("dragover", StructureHandler.dragOver);
-//            selectorBtn.addEventListener("drop", StructureHandler.dragDrop);
-//        }
-//    }
+    static prepareHover(target) {
+        target.insertAdjacentHTML("afterbegin", `<button class="selectStructBtn hide"></button>`);
+        const selectorBtn = target.querySelector(".selectStructBtn");
+        if (selectorBtn) {
+            selectorBtn.addEventListener("mousedown", HoverHandeler.#selectStruct);
+            selectorBtn.addEventListener("dragover", HoverHandeler.#dragOver);
+            selectorBtn.addEventListener("drop", HoverHandeler.#dragDrop);
+        }
+    }
 
-//    static selectStruct(event) {
-//        StructureHandler.#selectedStruc?.classList.remove("selectedStruct");
+    static #selectStruct(event) {
+        HoverHandeler.#selectedStruc?.classList.remove("selectedStruct");
 
-//        if (StructureHandler.#selectedStruc === event.target)
-//            return StructureHandler.#selectedStruc = null;
+        if (HoverHandeler.#selectedStruc === event.target)
+            return HoverHandeler.#selectedStruc = null;
 
-//        StructureHandler.#selectedStruc = event.target;
-//        StructureHandler.#selectedStruc.classList.add("selectedStruct");
-//    }
+        HoverHandeler.#selectedStruc = event.target;
+        HoverHandeler.#selectedStruc.classList.add("selectedStruct");
+    }
 
-//    static dragOver(event) {
-//        event.preventDefault();
-//    }
-//    static dragDrop(event) {
-//        event.preventDefault();
-//        const draggedElement = StructureHandler.#selectedStruc.parentNode;
-//        const targetID = `${draggedElement.parentNode.localName}.dynStruct`;
-//        const targetElement = event.target.closest(targetID) || event.target.querySelector(targetID);
+    static #dragOver(event) {
+        const targetID = `${HoverHandeler.#selectedStruc.parentNode.parentNode.localName}.dynStruct`;
+        HoverHandeler.#targetElem = event.target.closest(targetID) || event.target.querySelector(targetID);
+        if (!HoverHandeler.#targetElem)
+            return;
+        event.preventDefault();
+    }
+    static #dragDrop(event) {
+        event.preventDefault();
+        const draggedElement = HoverHandeler.#selectedStruc.parentNode;
 
-//        if (!targetElement || draggedElement === targetElement)
-//            return;
+        if (!HoverHandeler.#targetElem || draggedElement === HoverHandeler.#targetElem)
+            return;
 
-//        targetElement.appendChild(draggedElement, targetElement.nextSibling);
-//    }
-//}
+        HoverHandeler.#targetElem.appendChild(draggedElement, HoverHandeler.#targetElem.nextSibling);
+    }
+    static delete(target) {
+        target.querySelectorAll(".selectStructBtn")?.forEach((btn) => {
+            btn.removeEventListener("mousedown", HoverHandeler.#selectStruct);
+            btn.removeEventListener("dragover", HoverHandeler.#dragOver);
+            btn.removeEventListener("drop", HoverHandeler.#dragDrop);
+        });  
+    }
+}

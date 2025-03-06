@@ -71,6 +71,7 @@ header {
 
 header > h1 {
     flex: 1;
+    align-self: center;
     color: var(--white);
 }
 

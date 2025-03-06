@@ -139,7 +139,7 @@ div.dynStruct > iconify-icon {
     position: fixed;
     height: 2px;
     background-color: #007bff; /* Color de la línea */
-    display: none; /* Ocultar por defecto */
+    display: block; /* Ocultar por defecto */
     pointer-events: none; /* Evitar que interfiera con eventos del mouse */
     z-index: 1000; /* Asegurar que esté por encima de otros elementos */
 }
