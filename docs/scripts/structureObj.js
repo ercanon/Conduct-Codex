@@ -6,44 +6,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         return document.body.querySelector("header > buttons").forEach((btn) =>
             btn.remove());
 
-    StructureHandler.createStruct(document.body.querySelector("main"));
+    HoverHandeler.structIndicate = document.getElementById("structIndicate");
+    const main = document.body.querySelector("main");
+    StructureHandler.createStruct(main);
+    main.addEventListener("drop", HoverHandeler.dragDrop);
+    main.addEventListener("dragover", (event) =>
+        event.preventDefault());
 
-    document.getElementById("toggleMode").addEventListener("click", (event) => {
-        switch (event.target.innerText) {
-            case "Edit Mode":
-                event.target.innerText = "Rearrange Mode";
-                event.target.setAttribute("data-mode", "arrange");
+    const btnMode = document.getElementById("toggleMode")
+    btnMode.addEventListener("click", (event) => {
+        const button = event.target;
+        const btnState = button.innerText === "Edit Mode";
 
-                Array.from(document.getElementsByClassName("selectStructBtn")).forEach((el) => {
-                    el.classList.remove("hide")
-                    el.parentNode.draggable = true;
-                });
-                Array.from(document.getElementsByClassName("addStructBtn")).forEach((el) =>
-                    el.classList.add("hide"));
-                break;
-            case "Rearrange Mode":
-                event.target.innerText = "Preview Mode";
-                event.target.setAttribute("data-mode", "preview");
+        button.innerText = btnState ? "Rearrange Mode" : "Edit Mode";
+        button.setAttribute("data-mode", button.innerText.split(" ")[0]);
 
-                Array.from(document.getElementsByClassName("selectStructBtn")).forEach((el) => {
-                    el.classList.add("hide")
-                    el.parentNode.draggable = false;
-                });
-                break;
-            case "Preview Mode":
-                event.target.innerText = "Edit Mode";
-                event.target.setAttribute("data-mode", "edit");
+        HoverHandeler.selectStruct(null);
+        HoverHandeler.resetIndicate(false);
 
-                Array.from(document.getElementsByClassName("addStructBtn")).forEach((el) =>
-                    el.classList.remove("hide"));
-                break;
+        for (const struct of document.getElementsByClassName("dynStruct")) {
+            struct.draggable = btnState;
+            HoverHandeler.prepareHover(struct, btnState);
+            for (const child of struct.children)
+                if (!child.classList.contains("dynStruct"))
+                    child.style.pointerEvents = btnState ? "none" : "";
         }
+        for (const button of document.getElementsByClassName("addStructBtn"))
+            button.classList.toggle("hide", btnState);
     });
     document.getElementById("dataUpload").addEventListener("click", () => {
 
     });
     document.getElementById("dataDownload").addEventListener("click", () => {
-
     });
 });
 
@@ -69,87 +63,140 @@ class StructureHandler {
         /*>---------- [ Initialitation ] ----------<*/
         const parent = event.target?.parentNode || event;
         let lvlPrev = StructureHandler.#structArray.findIndex((struct) =>
-            struct.substring(0, 10).includes(parent.localName === "main" ?
-                event.target?.localName :
-                parent.localName));
+            struct.substring(0, 10).includes(parent.localName === "main"
+                ? event.target?.localName
+                : parent.localName));
 
         if (++lvlPrev >= StructureHandler.#structArray.length)
             return console.warn("Structure Array has reached its limit");
         const newDOM = StructureHandler.#parserDOM.createContextualFragment(StructureHandler.#structArray[lvlPrev]);
 
-        /*>---------- [ Add Button Selector ] ----------<*/
+        /*>---------- [ Set Struct ] ----------<*/
         const dynStruct = newDOM.querySelector(".dynStruct");
         if (dynStruct) {
             if (lvlPrev < StructureHandler.#structArray.length - 1)
                 dynStruct.insertAdjacentHTML("beforeend", StructureHandler.#structArray[0]);
             if (dynStruct.localName === "section")
                 StructureHandler.#changeColor(dynStruct, "black");
-
-            HoverHandeler.prepareHover(dynStruct);
         }
 
         /*>---------- [ Add Button Action ] ----------<*/
         newDOM.querySelector(".addStructBtn")?.addEventListener("click", StructureHandler.createStruct);
 
         /*>---------- [ Insert into HTML ] ----------<*/
-        parent.insertBefore(newDOM, parent.lastChild);
+        parent.insertBefore(newDOM, parent.lastElementChild);
     }
     static #changeColor(element, color) {
-        element.closest("section").style.setProperty("--sectionColor", color);
+        element.closest("section.dynStruct").style.setProperty("--sectionColor", color);
     }
     static #delete(event) {
         const target = event.target.closest(".dynStruct");
         target.querySelectorAll(".addStructBtn")?.forEach((btn) =>
             btn.removeEventListener("click", this.createStruct));
-        HoverHandeler.delete(target);
+        target.querySelectorAll(".dynStruct")?.forEach((struct) =>
+            HoverHandeler.prepareHover(struct, false));
     }
 }
 
 class HoverHandeler {
-    static #selectedStruc = null;
-    static #targetElem = null;
+    static structIndicate = null;
+    static #selectedStruct = null;
+    static #originalParent = null;
 
-    static prepareHover(target) {
-        target.insertAdjacentHTML("afterbegin", `<button class="selectStructBtn hide"></button>`);
-        const selectorBtn = target.querySelector(".selectStructBtn");
-        if (selectorBtn) {
-            selectorBtn.addEventListener("mousedown", HoverHandeler.#selectStruct);
-            selectorBtn.addEventListener("dragover", HoverHandeler.#dragOver);
-            selectorBtn.addEventListener("drop", HoverHandeler.#dragDrop);
-        }
+    static prepareHover(target, active) {
+        const action = active ? "addEventListener" : "removeEventListener";
+        target[action]("click", HoverHandeler.selectStruct);
+        target[action]("mousemove", HoverHandeler.#hoverStruct);
+        target[action]("dragstart", HoverHandeler.#dragStart);
+        target[action]("dragover", HoverHandeler.#dragOver);
+        target[action]("drop", HoverHandeler.dragDrop);
+    }
+    static resetIndicate(dragging) {
+        const action = dragging ? "add" : "remove";
+        Object.assign(HoverHandeler.structIndicate.style, {
+            transform: "",
+            width: "0",
+            height: "0",
+            transition: "none"
+        });
+        HoverHandeler.structIndicate.classList[action]("dragStruct");
     }
 
-    static #selectStruct(event) {
-        HoverHandeler.#selectedStruc?.classList.remove("selectedStruct");
+    static selectStruct(event, dragging) {
+        event?.stopPropagation();
+        HoverHandeler.#selectedStruct?.classList.remove("selectedStruct");
 
-        if (HoverHandeler.#selectedStruc === event.target)
-            return HoverHandeler.#selectedStruc = null;
+        if (!event || (!dragging && HoverHandeler.#selectedStruct === event.currentTarget))
+            return HoverHandeler.#selectedStruct = null;
 
-        HoverHandeler.#selectedStruc = event.target;
-        HoverHandeler.#selectedStruc.classList.add("selectedStruct");
+        HoverHandeler.#selectedStruct = event.currentTarget;
+        HoverHandeler.#selectedStruct.classList.add("selectedStruct");
     }
 
+    static #hoverStruct(event) {
+        event.stopPropagation();
+        if (HoverHandeler.#selectedStruct?.hasAttribute("style"))
+            return;
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        const styleValues = event.currentTarget === HoverHandeler.#selectedStruct
+            ? { width: "0", height: "0", transition: "none" }
+            : { width: `${rect.width}px`, height: `${rect.height}px`, transition: "" };
+
+        Object.assign(HoverHandeler.structIndicate.style, {
+            transform: `translate(${rect.left}px, ${rect.top}px)`,
+            ...styleValues
+        });
+    }
+
+    static #dragStart(event) {
+        event.stopPropagation();
+
+        HoverHandeler.selectStruct(event, true);
+        HoverHandeler.resetIndicate(true);
+        requestAnimationFrame(() => {
+            HoverHandeler.#selectedStruct.style.visibility = "hidden";
+            HoverHandeler.#selectedStruct.ogParentName = HoverHandeler.#selectedStruct.parentNode.localName;
+            HoverHandeler.#selectedStruct.replaceWith(HoverHandeler.structIndicate);
+        });
+    }
     static #dragOver(event) {
-        const targetID = `${HoverHandeler.#selectedStruc.parentNode.parentNode.localName}.dynStruct`;
-        HoverHandeler.#targetElem = event.target.closest(targetID) || event.target.querySelector(targetID);
-        if (!HoverHandeler.#targetElem)
-            return;
         event.preventDefault();
+        event.stopPropagation();
+
+        const { currentTarget, clientX, clientY } = event;
+        const selectedName = HoverHandeler.#selectedStruct.localName;
+        if (selectedName === currentTarget.localName) {
+            const rect = currentTarget.getBoundingClientRect();
+            const isLeftOrTop = selectedName === "div"
+                ? clientX < rect.left + rect.width / 2
+                : clientY < rect.top + rect.height / 2;
+
+            currentTarget.parentNode.insertBefore(
+                HoverHandeler.structIndicate,
+                isLeftOrTop ? currentTarget : currentTarget.nextSibling
+            );
+        }
+        else if (HoverHandeler.#selectedStruct.ogParentName === currentTarget.localName
+            && !currentTarget.querySelector(`${selectedName}.dynStruct`))
+            currentTarget.insertBefore(
+                HoverHandeler.structIndicate,
+                currentTarget.lastElementChild
+            );
+
+        const size = selectedName === "section" ? "10px" : "5px";
+        Object.assign(HoverHandeler.structIndicate.style, {
+            width: "",
+            height: size
+        });
     }
-    static #dragDrop(event) {
+    static dragDrop(event) {
         event.preventDefault();
-        const draggedElement = HoverHandeler.#selectedStruc.parentNode;
+        event.stopPropagation();
 
-        if (!HoverHandeler.#targetElem || draggedElement === HoverHandeler.#targetElem)
-            return;
+        HoverHandeler.structIndicate.replaceWith(HoverHandeler.#selectedStruct);
 
-        HoverHandeler.#targetElem.appendChild(draggedElement, HoverHandeler.#targetElem.nextSibling);
-    }
-    static delete(target) {
-        target.querySelectorAll(".selectStructBtn")?.forEach((btn) => {
-            btn.removeEventListener("mousedown", HoverHandeler.#selectStruct);
-            btn.removeEventListener("dragover", HoverHandeler.#dragOver);
-            btn.removeEventListener("drop", HoverHandeler.#dragDrop);
-        });  
+        HoverHandeler.#selectedStruct.removeAttribute("style");
+        HoverHandeler.resetIndicate(false);
     }
 }

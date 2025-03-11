@@ -92,25 +92,20 @@ header > button {
 #toggleMode {
     margin-inline: var(--tightSpaceLyt);
     padding-inline: var(--spaceLyt);
+    font-weight: bold;
     color: var(--white);
 }
-#toggleMode[data-mode="edit"] {
+#toggleMode[data-mode="Edit"] {
     background-color: var(--green);
 }
-    #toggleMode[data-mode="edit"]:hover {
+    #toggleMode[data-mode="Edit"]:hover {
         background-color: var(--greenHvr);
     }
-#toggleMode[data-mode="arrange"] {
+#toggleMode[data-mode="Rearrange"] {
     background-color: var(--gold);
 }
-    #toggleMode[data-mode="arrange"]:hover {
+    #toggleMode[data-mode="Rearrange"]:hover {
         background-color: var(--goldHvr);
-    }
-#toggleMode[data-mode="preview"] {
-    background-color: var(--greyHvr);
-}
-    #toggleMode[data-mode="preview"]:hover {
-        background-color: var(--grey);
     }
 
 #dataUpload {
@@ -137,8 +132,8 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: var(--spaceLyt);
     gap: var(--spaceLyt);
+    padding: var(--spaceLyt);
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -166,6 +161,25 @@ main {
 @keyframes zoom-in {
     from {
         transform: scale(0);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+@keyframes expand-down {
+    from {
+        transform: scale(1, 0);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+@keyframes expand-right {
+    from {
+        transform: scale(0, 1);
     }
 
     to {
