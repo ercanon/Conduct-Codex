@@ -18,6 +18,11 @@
     --gold: rgb(247, 187, 75);
     --goldHvr: rgb(180, 130, 50);
 }
+@media (max-width: 700px) {
+    :root {
+        font-size: 14px;
+    }
+}
 
 button {
     border: none;
@@ -26,7 +31,7 @@ button {
 }
 
 input {
-    font-size: medium;
+    font-size: 1rem;
     color: var(--colorSection);
     border: none;
     background: none;
@@ -72,6 +77,7 @@ header {
 header > h1 {
     flex: 1;
     align-self: center;
+    font-size: 2rem;
     color: var(--white);
 }
 

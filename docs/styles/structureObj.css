@@ -20,13 +20,14 @@ section.dynStruct {
 }
 
 section.dynStruct > input {
+    min-width: 20vw;
     color: var(--white);
-    font-size: x-large;
+    font-size: 1.5rem;
     font-weight: bold;
 }
 .section-usage {
     text-align: right;
-    font-size: larger;
+    font-size: 1.2rem !important;
 }
 
 section.dynStruct > .addStructBtn {
@@ -41,14 +42,13 @@ article.dynStruct {
     border-radius: var(--spaceLyt);
     padding: var(--tightSpaceLyt);
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    grid-template-rows: min-content;
     grid-auto-rows: 40px;
     gap: var(--tightSpaceLyt);
 }
 
 .article-type {
     grid-column: 1/-1;
-    font-size: medium;
+    font-size: 1.07rem;
 }
 
 
@@ -71,7 +71,7 @@ div.dynStruct > iconify-icon {
 }
 
 .div-title {
-    font-size: large;
+    font-size: 1.2rem;
     font-weight: bold;
 }
 
@@ -140,16 +140,16 @@ div.dynStruct > iconify-icon {
     z-index: 600;
 }
 
-.dragStruct {
-    position: relative !important;
-    width: 100%;
-    background-color: var(--blueHvr) !important;
-    opacity: unset !important;
-}
-
 
 
 /*>--------------- { Dinamic Class } ---------------<*/
 .selectedStruct {
     outline: 3px solid var(--gold);
+}
+
+.dragStruct {
+    position: relative !important;
+    width: 100%;
+    background-color: var(--blueHvr) !important;
+    opacity: unset !important;
 }

@@ -7,11 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.remove());
 
     HoverHandeler.structIndicate = document.getElementById("structIndicate");
-    const main = document.body.querySelector("main");
-    StructureHandler.createStruct(main);
-    main.addEventListener("drop", HoverHandeler.dragDrop);
-    main.addEventListener("dragover", (event) =>
-        event.preventDefault());
+    StructureHandler.createStruct(document.body.querySelector("main"));
 
     const btnMode = document.getElementById("toggleMode")
     btnMode.addEventListener("click", (event) => {
@@ -46,7 +42,7 @@ class StructureHandler {
         `<button class="addStructBtn"></button>`,
         `<section class="dynStruct" draggable="false">
             <input type="text" class="section-title" placeholder = "Title">
-            <input type="text" class="section-usage" placeholder = "Usage">
+            <input type="text" class="section-usage" placeholder = "Usage" >
          </section>`,
         `<article class="dynStruct" draggable="false">
             <input type="text" class="article-type" placeholder = "Entry Type">
@@ -109,14 +105,14 @@ class HoverHandeler {
         target[action]("mousemove", HoverHandeler.#hoverStruct);
         target[action]("dragstart", HoverHandeler.#dragStart);
         target[action]("dragover", HoverHandeler.#dragOver);
-        target[action]("drop", HoverHandeler.dragDrop);
+        target[action]("dragend", HoverHandeler.#dragDrop);
     }
     static resetIndicate(dragging) {
         const action = dragging ? "add" : "remove";
         Object.assign(HoverHandeler.structIndicate.style, {
             transform: "",
-            width: "0",
-            height: "0",
+            width: "",
+            height: HoverHandeler.#selectedStruct?.localName === "section" ? "10px" : "5px",
             transition: "none"
         });
         HoverHandeler.structIndicate.classList[action]("dragStruct");
@@ -134,9 +130,9 @@ class HoverHandeler {
     }
 
     static #hoverStruct(event) {
-        event.stopPropagation();
-        if (HoverHandeler.#selectedStruct?.hasAttribute("style"))
+        if (HoverHandeler.#selectedStruct?.ogParentName)
             return;
+        event.stopPropagation();
 
         const rect = event.currentTarget.getBoundingClientRect();
         const styleValues = event.currentTarget === HoverHandeler.#selectedStruct
@@ -155,7 +151,6 @@ class HoverHandeler {
         HoverHandeler.selectStruct(event, true);
         HoverHandeler.resetIndicate(true);
         requestAnimationFrame(() => {
-            HoverHandeler.#selectedStruct.style.visibility = "hidden";
             HoverHandeler.#selectedStruct.ogParentName = HoverHandeler.#selectedStruct.parentNode.localName;
             HoverHandeler.#selectedStruct.replaceWith(HoverHandeler.structIndicate);
         });
@@ -177,26 +172,20 @@ class HoverHandeler {
                 isLeftOrTop ? currentTarget : currentTarget.nextSibling
             );
         }
-        else if (HoverHandeler.#selectedStruct.ogParentName === currentTarget.localName
-            && !currentTarget.querySelector(`${selectedName}.dynStruct`))
+        else if (HoverHandeler.#selectedStruct.ogParentName === currentTarget.localName)
             currentTarget.insertBefore(
                 HoverHandeler.structIndicate,
                 currentTarget.lastElementChild
             );
-
-        const size = selectedName === "section" ? "10px" : "5px";
-        Object.assign(HoverHandeler.structIndicate.style, {
-            width: "",
-            height: size
-        });
     }
-    static dragDrop(event) {
+    static #dragDrop(event) {
         event.preventDefault();
         event.stopPropagation();
 
         HoverHandeler.structIndicate.replaceWith(HoverHandeler.#selectedStruct);
+        document.body.appendChild(HoverHandeler.structIndicate);
 
-        HoverHandeler.#selectedStruct.removeAttribute("style");
+        HoverHandeler.#selectedStruct.ogParentName = null;
         HoverHandeler.resetIndicate(false);
     }
 }
