@@ -15,12 +15,12 @@
     --blueHvr: rgb(0, 75, 140);
     --green: rgb(76, 175, 80);
     --greenHvr: rgb(54, 127, 58);
-    --gold: rgb(247, 187, 75);
-    --goldHvr: rgb(180, 130, 50);
+    --gold: rgb(225, 168, 61);
+    --goldHvr: rgb(171, 123, 47);
 }
 @media (max-width: 700px) {
     :root {
-        font-size: 13px;
+        font-size: 14px;
     }
 }
 
@@ -32,7 +32,7 @@ button {
 
 input {
     font-size: 1rem;
-    color: var(--colorSection);
+    color: var(--sectionColor);
     border: none;
     background: none;
     width: 100%;
@@ -60,10 +60,87 @@ body {
     align-items: center;
     width: 100vw;
     height: 100vh;
-    background-color: rgb(65, 65, 65, 0.65);
+    background-color: rgb(65, 65, 65, .65);
     animation: fade-in .3s ease forwards;
     z-index: 2000;
 }
+
+/*>--------------- { Dropdown } ---------------<*/
+#dropdownIcon {
+    position: absolute;
+    width: calc(100% - (15px * 2)); /*width - margin*/
+    align-self: center;
+    margin-block: var(--tightSpaceLyt);
+    border: 1px solid var(--black);
+    border-radius: var(--tightSpaceLyt);
+    background-color: var(--white);
+    overflow: hidden;
+    box-sizing: border-box;
+    z-index: 500;
+}
+
+    #dropdownIcon > input[type="text"] {
+        padding: var(--tightSpaceLyt);
+        border: none;
+        border-bottom: 1px solid var(--grey);
+        color: var(--black);
+        box-sizing: border-box;
+        background: var(--white);
+    }
+
+    #dropdownIcon > span {
+        display: grid;
+        text-align: center;
+        grid-template-columns: repeat(auto-fill, minmax(3.45rem, 1fr));
+        gap: var(--spaceLyt);
+        padding: var(--spaceLyt);
+        font-size: .85rem;
+        box-sizing: border-box;
+        word-wrap: break-word;
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 25vh;
+    }
+
+        #dropdownIcon > span figure:hover {
+            outline: 2px solid var(--whiteHvr);
+        }
+
+        #dropdownIcon > span iconify-icon {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+        }
+
+/*>--------------- { Delete Struct } ---------------<*/
+#deleteStruct {
+    position: absolute;
+    bottom: var(--looseSpaceLyt);
+    width: 60%;
+    height: 50px;
+    background: var(--red);
+    color: var(--white);
+    border-radius: var(--looseSpaceLyt);
+    align-self: center;
+    z-index: 900;
+}
+
+    #deleteStruct::before {
+        content: "";
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        transition: background-color .3s ease;
+        background-color: currentColor;
+        --mask-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M7 21q-.825 0-1.412-.587T5 19V6q-.425 0-.712-.288T4 5t.288-.712T5 4h4q0-.425.288-.712T10 3h4q.425 0 .713.288T15 4h4q.425 0 .713.288T20 5t-.288.713T19 6v13q0 .825-.587 1.413T17 21zm3-4q.425 0 .713-.288T11 16V9q0-.425-.288-.712T10 8t-.712.288T9 9v7q0 .425.288.713T10 17m4 0q.425 0 .713-.288T15 16V9q0-.425-.288-.712T14 8t-.712.288T13 9v7q0 .425.288.713T14 17'/%3E%3C/svg%3E");
+        -webkit-mask-image: var(--mask-url);
+        mask-image: var(--mask-url);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+    }
 
 /*>--------------- { Banner } ---------------<*/
 header {
@@ -98,6 +175,7 @@ header > button {
 #toggleMode {
     margin-inline: var(--tightSpaceLyt);
     padding-inline: var(--spaceLyt);
+    font-size: .8rem;
     font-weight: bold;
     color: var(--white);
 }
@@ -107,10 +185,10 @@ header > button {
     #toggleMode[data-mode="Edit"]:hover {
         background-color: var(--greenHvr);
     }
-#toggleMode[data-mode="Rearrange"] {
+#toggleMode[data-mode="Reorder"] {
     background-color: var(--gold);
 }
-    #toggleMode[data-mode="Rearrange"]:hover {
+    #toggleMode[data-mode="Reorder"]:hover {
         background-color: var(--goldHvr);
     }
 
@@ -143,47 +221,6 @@ main {
     overflow-y: auto;
     overflow-x: hidden;
 }
-
-/*>--------------- { Dropdown } ---------------<*/
-#dropdownIcon {
-    position: absolute;
-    width: calc(100% - (15px * 2)); /*width - margin*/
-    align-self: center;
-    margin-block: var(--tightSpaceLyt);
-    border: 1px solid var(--black);
-    border-radius: var(--tightSpaceLyt);
-    background-color: var(--white);
-    overflow: hidden;
-    box-sizing: border-box;
-    z-index: 500;
-}
-
-    #dropdownIcon > input[type="text"] {
-        padding: var(--tightSpaceLyt);
-        border: none;
-        border-bottom: 1px solid var(--grey);
-        color: var(--black);
-        box-sizing: border-box;
-        background: var(--white);
-    }
-
-    #dropdownIcon > span {
-        display: grid;
-        text-align: center;
-        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-        gap: var(--spaceLyt);
-        padding: var(--spaceLyt);
-        font-size: .85rem;
-        box-sizing: border-box;
-        word-wrap: break-word;
-        overflow-y: auto;
-        overflow-x: hidden;
-        max-height: 25vh;
-    }
-        #dropdownIcon > span figure:hover {
-            outline: 2px solid var(--whiteHvr);
-        }
-
 
 
 

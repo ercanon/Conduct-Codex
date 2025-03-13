@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     HoverHandeler.indStruct = document.getElementById("indStruct");
     StructureHandler.createStruct(document.body.querySelector("main"));
 
+    const delStruct = document.getElementById("deleteStruct");
+    delStruct.addEventListener("dragover", HoverHandeler.dragOver);
+
     StructureHandler.dropdownIcon = document.getElementById("dropdownIcon");
     const dropdownList = StructureHandler.dropdownIcon.lastElementChild;
 
@@ -20,15 +23,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         .then((response) =>
             response.json())
         .then((data) => {
-            Iconify.addCollection(data);
-            Iconify.listIcons("", data.prefix).forEach((iconName) => {
-                const figure = document.createElement("figure");
-                figure.appendChild(Iconify.renderSVG(iconName, {
-                    height: "unset"
-                }));
+            Object.keys(data.icons).forEach(async (name) => {
+                const iconName = `${data.prefix}:${name}`;
 
-                const nameFig = document.createElement("figcaption");
-                nameFig.textContent = iconName.split(":")[1];
+                const figure = document.createElement("figure");
+                const icon = document.createElement("iconify-icon");
+                Object.assign(icon, {
+                    icon: iconName,
+                    width: "unset",
+                    height: "unset"
+                });
+                figure.appendChild(icon);
+
+                const nameFig = document.createElement("p");
+                nameFig.innerText = name;
                 figure.appendChild(nameFig);
 
                 figure.addEventListener("click", () => {
@@ -38,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
                 dropdownList.appendChild(figure);
-            });
+        });
 
             StructureHandler.dropdownIcon.firstElementChild.addEventListener("input", (event) => {
                 const textInput = event.currentTarget.value.toLowerCase();
@@ -56,17 +64,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     /*>---------- [ initialize Mode Change ] ----------<*/
     const btnMode = document.getElementById("toggleMode")
     btnMode.addEventListener("click", (event) => {
+        //Determine Mode
         const button = event.target;
         const btnState = button.innerText === "Edit Mode";
 
-        button.innerText = btnState ? "Rearrange Mode" : "Edit Mode";
+        button.innerText = btnState ? "Reorder Mode" : "Edit Mode";
         button.setAttribute("data-mode", button.innerText.split(" ")[0]);
 
-        HoverHandeler.selectStruct(null);
+        //Clear utils
+        StructureHandler.dropdownIcon.client = null;
+        StructureHandler.dropdownIcon.classList.add("hide")
         HoverHandeler.resetIndicate(false);
 
+        //Change Mode Elements
         for (const struct of document.getElementsByClassName("dynStruct")) {
             struct.draggable = btnState;
+            struct.style.cursor = btnState ? "grab" : "";
             HoverHandeler.prepareHover(struct, btnState);
             for (const child of struct.children) {
                 if (!child.classList.contains("dynStruct"))
@@ -90,6 +103,7 @@ class StructureHandler {
     static #structArray = [
         `<button class="addStructBtn"></button>`,
         `<section class="dynStruct" draggable="false">
+            <input type="color" class="section-color">
             <input type="text" class="section-title" placeholder = "Title">
             <input type="text" class="section-usage" placeholder = "Usage" >
          </section>`,
@@ -122,10 +136,14 @@ class StructureHandler {
             if (lvlPrev < StructureHandler.#structArray.length - 1)
                 dynStruct.insertAdjacentHTML("beforeend", StructureHandler.#structArray[0]);
 
-            if (dynStruct.localName === "section")
-                StructureHandler.#changeColor(dynStruct, "black");
-            else if (dynStruct.firstElementChild.localName === "iconify-icon")
-                dynStruct.firstElementChild.addEventListener("click", StructureHandler.#dropdownCall);
+            const fistChild = dynStruct.firstElementChild;
+            if (dynStruct.localName === "section") {
+                fistChild.addEventListener("input", StructureHandler.#changeColor);
+                //fistChild.addEventListener("change", (event) => { });
+                fistChild.dispatchEvent(new Event("input"));
+            }
+            else if (fistChild.localName === "iconify-icon")
+                fistChild.addEventListener("click", StructureHandler.#dropdownCall);
         }
 
         /*>---------- [ Add Button Action ] ----------<*/
@@ -135,15 +153,21 @@ class StructureHandler {
         parent.insertBefore(newDOM, parent.lastElementChild);
     }
 
-    static #changeColor(element, color) {
-        element.closest("section.dynStruct").style.setProperty("--sectionColor", color);
+    static #changeColor(event) {
+        event.currentTarget.parentNode.style.setProperty("--sectionColor", event.currentTarget.value);
     }
-    static #delete(event) {
-        const target = event.target.closest(".dynStruct");
+    static delete(target) {
         target.querySelectorAll(".addStructBtn")?.forEach((btn) =>
             btn.removeEventListener("click", StructureHandler.createStruct));
-        target.querySelectorAll("iconify-icon")?.forEach((icon) =>
-            icon.removeEventListener("click", StructureHandler.#dropdownCall));
+
+        target.querySelectorAll(".section-color")?.forEach((color) => {
+            color.removeEventListener("input", StructureHandler.#changeColor)
+            //color.removeEventListener("change", StructureHandler.#dropdownCall)
+        });
+
+        target.querySelectorAll(".addStructBtn")?.forEach((btn) =>
+            btn.removeEventListener("click", StructureHandler.createStruct));
+
         target.querySelectorAll(".dynStruct")?.forEach((struct) =>
             HoverHandeler.prepareHover(struct, false));
     }
@@ -163,36 +187,25 @@ class HoverHandeler {
 
     static prepareHover(target, active) {
         const action = active ? "addEventListener" : "removeEventListener";
-        target[action]("click", HoverHandeler.selectStruct);
         target[action]("mousemove", HoverHandeler.#hoverStruct);
         target[action]("dragstart", HoverHandeler.#dragStart);
-        target[action]("dragover", HoverHandeler.#dragOver);
+        target[action]("dragover", HoverHandeler.dragOver);
         target[action]("dragend", HoverHandeler.#dragDrop);
     }
     static resetIndicate(dragging) {
-        const action = dragging ? "add" : "remove";
         Object.assign(HoverHandeler.indStruct.style, {
             transform: "",
             width: "",
             height: HoverHandeler.#selectedStruct?.localName === "section" ? "10px" : "5px",
             transition: "none"
         });
-        HoverHandeler.indStruct.classList[action]("dragStruct");
-    }
 
-    static selectStruct(event, dragging) {
-        event?.stopPropagation();
-        HoverHandeler.#selectedStruct?.classList.remove("selectedStruct");
-
-        if (!event || (!dragging && HoverHandeler.#selectedStruct === event.currentTarget))
-            return HoverHandeler.#selectedStruct = null;
-
-        HoverHandeler.#selectedStruct = event.currentTarget;
-        HoverHandeler.#selectedStruct.classList.add("selectedStruct");
+        HoverHandeler.#selectedStruct = null;
+        HoverHandeler.indStruct.classList.toggle("dragStruct", dragging);
     }
 
     static #hoverStruct(event) {
-        if (HoverHandeler.#selectedStruct?.ogParentName)
+        if (HoverHandeler.#selectedStruct)
             return;
         event.stopPropagation();
 
@@ -209,15 +222,15 @@ class HoverHandeler {
 
     static #dragStart(event) {
         event.stopPropagation();
-
-        HoverHandeler.selectStruct(event, true);
         HoverHandeler.resetIndicate(true);
+        HoverHandeler.#selectedStruct = event.currentTarget;
+
         requestAnimationFrame(() => {
             HoverHandeler.#selectedStruct.ogParentName = HoverHandeler.#selectedStruct.parentNode.localName;
             HoverHandeler.#selectedStruct.replaceWith(HoverHandeler.indStruct);
         });
     }
-    static #dragOver(event) {
+    static dragOver(event) {
         event.preventDefault();
         event.stopPropagation();
 
@@ -239,12 +252,17 @@ class HoverHandeler {
                 HoverHandeler.indStruct,
                 currentTarget.lastElementChild
             );
+        else if (currentTarget.id === "deleteStruct")
+            currentTarget.appendChild(HoverHandeler.indStruct);
     }
     static #dragDrop(event) {
         event.preventDefault();
         event.stopPropagation();
 
-        HoverHandeler.indStruct.replaceWith(HoverHandeler.#selectedStruct);
+        if (HoverHandeler.indStruct.parentNode.id === "deleteStruct")
+            StructureHandler.delete(event.currentTarget);
+        else 
+            HoverHandeler.indStruct.replaceWith(HoverHandeler.#selectedStruct);
         document.body.appendChild(HoverHandeler.indStruct);
 
         HoverHandeler.#selectedStruct.ogParentName = null;
