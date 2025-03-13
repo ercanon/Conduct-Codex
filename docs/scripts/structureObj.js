@@ -2,13 +2,58 @@
 document.addEventListener('DOMContentLoaded', async () => {
     isHost = !(new URLSearchParams(window.location.search).get("data"));
 
-    if (!isHost)
-        return document.body.querySelector("header > buttons").forEach((btn) =>
-            btn.remove());
+    if (!isHost) {
+        for (const id of ["toggleMode", "dataUpload", "dropdownIcon", "indStruct"])
+            document.getElementById(id).remove()
+        return;
+    }
 
-    HoverHandeler.structIndicate = document.getElementById("structIndicate");
+    /*>---------- [ initialize Components ] ----------<*/
+    HoverHandeler.indStruct = document.getElementById("indStruct");
     StructureHandler.createStruct(document.body.querySelector("main"));
 
+    StructureHandler.dropdownIcon = document.getElementById("dropdownIcon");
+    const dropdownList = StructureHandler.dropdownIcon.lastElementChild;
+
+    /*>---------- [ Initizalize dropdown ] ----------<*/
+    fetch("https://cdn.jsdelivr.net/npm/@iconify-json/game-icons/icons.json")
+        .then((response) =>
+            response.json())
+        .then((data) => {
+            Iconify.addCollection(data);
+            Iconify.listIcons("", data.prefix).forEach((iconName) => {
+                const figure = document.createElement("figure");
+                figure.appendChild(Iconify.renderSVG(iconName, {
+                    height: "unset"
+                }));
+
+                const nameFig = document.createElement("figcaption");
+                nameFig.textContent = iconName.split(":")[1];
+                figure.appendChild(nameFig);
+
+                figure.addEventListener("click", () => {
+                    StructureHandler.dropdownIcon.client?.setAttribute("icon", iconName);
+                    StructureHandler.dropdownIcon.client = null;
+                    dropdownIcon.classList.add("hide");
+                });
+
+                dropdownList.appendChild(figure);
+            });
+
+            StructureHandler.dropdownIcon.firstElementChild.addEventListener("input", (event) => {
+                const textInput = event.currentTarget.value.toLowerCase();
+                [...dropdownList.children].forEach(async (icon) =>
+                    icon.classList.toggle("hide", !icon.lastElementChild.textContent.toLowerCase().includes(textInput)));
+            });
+            StructureHandler.dropdownIcon.addEventListener("mouseleave", () => {
+                StructureHandler.dropdownIcon.client = null;
+                dropdownIcon.classList.add("hide");
+            });
+        })
+        .catch((error) =>
+            console.error("Error loading icons", error));
+
+    /*>---------- [ initialize Mode Change ] ----------<*/
     const btnMode = document.getElementById("toggleMode")
     btnMode.addEventListener("click", (event) => {
         const button = event.target;
@@ -23,13 +68,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         for (const struct of document.getElementsByClassName("dynStruct")) {
             struct.draggable = btnState;
             HoverHandeler.prepareHover(struct, btnState);
-            for (const child of struct.children)
+            for (const child of struct.children) {
                 if (!child.classList.contains("dynStruct"))
                     child.style.pointerEvents = btnState ? "none" : "";
+            }
         }
         for (const button of document.getElementsByClassName("addStructBtn"))
             button.classList.toggle("hide", btnState);
     });
+
+    /*>---------- [ Initialize Data Handeler ] ----------<*/
     document.getElementById("dataUpload").addEventListener("click", () => {
 
     });
@@ -38,6 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 class StructureHandler {
+    static dropdownIcon = null;
     static #structArray = [
         `<button class="addStructBtn"></button>`,
         `<section class="dynStruct" draggable="false">
@@ -72,8 +121,11 @@ class StructureHandler {
         if (dynStruct) {
             if (lvlPrev < StructureHandler.#structArray.length - 1)
                 dynStruct.insertAdjacentHTML("beforeend", StructureHandler.#structArray[0]);
+
             if (dynStruct.localName === "section")
                 StructureHandler.#changeColor(dynStruct, "black");
+            else if (dynStruct.firstElementChild.localName === "iconify-icon")
+                dynStruct.firstElementChild.addEventListener("click", StructureHandler.#dropdownCall);
         }
 
         /*>---------- [ Add Button Action ] ----------<*/
@@ -82,22 +134,32 @@ class StructureHandler {
         /*>---------- [ Insert into HTML ] ----------<*/
         parent.insertBefore(newDOM, parent.lastElementChild);
     }
+
     static #changeColor(element, color) {
         element.closest("section.dynStruct").style.setProperty("--sectionColor", color);
     }
     static #delete(event) {
         const target = event.target.closest(".dynStruct");
         target.querySelectorAll(".addStructBtn")?.forEach((btn) =>
-            btn.removeEventListener("click", this.createStruct));
+            btn.removeEventListener("click", StructureHandler.createStruct));
+        target.querySelectorAll("iconify-icon")?.forEach((icon) =>
+            icon.removeEventListener("click", StructureHandler.#dropdownCall));
         target.querySelectorAll(".dynStruct")?.forEach((struct) =>
             HoverHandeler.prepareHover(struct, false));
+    }
+
+    static #dropdownCall(event) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        StructureHandler.dropdownIcon.style.transform = `translateY(${rect.bottom}px)`;
+
+        StructureHandler.dropdownIcon.client = event.currentTarget;
+        StructureHandler.dropdownIcon.classList.remove("hide")
     }
 }
 
 class HoverHandeler {
-    static structIndicate = null;
+    static indStruct = null;
     static #selectedStruct = null;
-    static #originalParent = null;
 
     static prepareHover(target, active) {
         const action = active ? "addEventListener" : "removeEventListener";
@@ -109,13 +171,13 @@ class HoverHandeler {
     }
     static resetIndicate(dragging) {
         const action = dragging ? "add" : "remove";
-        Object.assign(HoverHandeler.structIndicate.style, {
+        Object.assign(HoverHandeler.indStruct.style, {
             transform: "",
             width: "",
             height: HoverHandeler.#selectedStruct?.localName === "section" ? "10px" : "5px",
             transition: "none"
         });
-        HoverHandeler.structIndicate.classList[action]("dragStruct");
+        HoverHandeler.indStruct.classList[action]("dragStruct");
     }
 
     static selectStruct(event, dragging) {
@@ -139,7 +201,7 @@ class HoverHandeler {
             ? { width: "0", height: "0", transition: "none" }
             : { width: `${rect.width}px`, height: `${rect.height}px`, transition: "" };
 
-        Object.assign(HoverHandeler.structIndicate.style, {
+        Object.assign(HoverHandeler.indStruct.style, {
             transform: `translate(${rect.left}px, ${rect.top}px)`,
             ...styleValues
         });
@@ -152,7 +214,7 @@ class HoverHandeler {
         HoverHandeler.resetIndicate(true);
         requestAnimationFrame(() => {
             HoverHandeler.#selectedStruct.ogParentName = HoverHandeler.#selectedStruct.parentNode.localName;
-            HoverHandeler.#selectedStruct.replaceWith(HoverHandeler.structIndicate);
+            HoverHandeler.#selectedStruct.replaceWith(HoverHandeler.indStruct);
         });
     }
     static #dragOver(event) {
@@ -168,13 +230,13 @@ class HoverHandeler {
                 : clientY < rect.top + rect.height / 2;
 
             currentTarget.parentNode.insertBefore(
-                HoverHandeler.structIndicate,
+                HoverHandeler.indStruct,
                 isLeftOrTop ? currentTarget : currentTarget.nextSibling
             );
         }
         else if (HoverHandeler.#selectedStruct.ogParentName === currentTarget.localName)
             currentTarget.insertBefore(
-                HoverHandeler.structIndicate,
+                HoverHandeler.indStruct,
                 currentTarget.lastElementChild
             );
     }
@@ -182,8 +244,8 @@ class HoverHandeler {
         event.preventDefault();
         event.stopPropagation();
 
-        HoverHandeler.structIndicate.replaceWith(HoverHandeler.#selectedStruct);
-        document.body.appendChild(HoverHandeler.structIndicate);
+        HoverHandeler.indStruct.replaceWith(HoverHandeler.#selectedStruct);
+        document.body.appendChild(HoverHandeler.indStruct);
 
         HoverHandeler.#selectedStruct.ogParentName = null;
         HoverHandeler.resetIndicate(false);

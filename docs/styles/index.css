@@ -20,7 +20,7 @@
 }
 @media (max-width: 700px) {
     :root {
-        font-size: 14px;
+        font-size: 13px;
     }
 }
 
@@ -77,7 +77,7 @@ header {
 header > h1 {
     flex: 1;
     align-self: center;
-    font-size: 2rem;
+    font-size: 1.9rem;
     color: var(--white);
 }
 
@@ -143,6 +143,47 @@ main {
     overflow-y: auto;
     overflow-x: hidden;
 }
+
+/*>--------------- { Dropdown } ---------------<*/
+#dropdownIcon {
+    position: absolute;
+    width: calc(100% - (15px * 2)); /*width - margin*/
+    align-self: center;
+    margin-block: var(--tightSpaceLyt);
+    border: 1px solid var(--black);
+    border-radius: var(--tightSpaceLyt);
+    background-color: var(--white);
+    overflow: hidden;
+    box-sizing: border-box;
+    z-index: 500;
+}
+
+    #dropdownIcon > input[type="text"] {
+        padding: var(--tightSpaceLyt);
+        border: none;
+        border-bottom: 1px solid var(--grey);
+        color: var(--black);
+        box-sizing: border-box;
+        background: var(--white);
+    }
+
+    #dropdownIcon > span {
+        display: grid;
+        text-align: center;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: var(--spaceLyt);
+        padding: var(--spaceLyt);
+        font-size: .85rem;
+        box-sizing: border-box;
+        word-wrap: break-word;
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 25vh;
+    }
+        #dropdownIcon > span figure:hover {
+            outline: 2px solid var(--whiteHvr);
+        }
+
 
 
 

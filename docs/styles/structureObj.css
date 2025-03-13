@@ -13,6 +13,7 @@
 section.dynStruct {
     background-color: var(--sectionColor);
     padding: var(--spaceLyt);
+    padding-top: var(--tightSpaceLyt);
     border-radius: var(--spaceLyt);
     grid-template-columns: 1fr min-content;
     gap: var(--tightSpaceLyt);
@@ -55,6 +56,7 @@ article.dynStruct {
 
 div.dynStruct {
     grid-template-columns: min-content 1fr;
+    height: 100%;
     column-gap: var(--tightSpaceLyt);
     transition: box-shadow 0.3s ease;
 }
@@ -64,11 +66,16 @@ div.dynStruct {
 
 div.dynStruct > iconify-icon {
     grid-row: span 2;
+    padding: 2px;
+    box-sizing: border-box;
     aspect-ratio: 1 / 1;
     height: 100%;
     color: var(--white);
     background-color: var(--sectionColor);
 }
+    div.dynStruct > iconify-icon:hover {
+        color: var(--whiteHvr);
+    }
 
 .div-title {
     font-size: 1.2rem;
@@ -123,7 +130,7 @@ div.dynStruct > iconify-icon {
     background: none;
     transition: background-color .3s ease;
     cursor: grab;
-    z-index: 500;
+    z-index: 800;
 }
     .selectStructBtn:hover {
         background-color: var(--blue);
