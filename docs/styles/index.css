@@ -178,6 +178,9 @@ body {
     transition: all .3s ease;
     z-index: 900;
 }
+    #deleteStruct[data-mode="Edit"] {
+        bottom: -10vh;
+    }
     #deleteStruct::before {
         content: "";
         position: absolute;
@@ -244,14 +247,12 @@ header > button {
 #toggleMode {
     margin-inline: var(--tightSpaceLyt);
     padding-inline: var(--spaceLyt);
-    font-size: .8rem;
+    font-size: .9rem;
     font-weight: bold;
     color: var(--white);
-}
-#toggleMode[data-mode="Edit"] {
     background-color: var(--green);
 }
-    #toggleMode[data-mode="Edit"]:hover {
+    #toggleMode:hover {
         background-color: var(--greenHvr);
     }
 #toggleMode[data-mode="Reorder"] {
