@@ -5,7 +5,7 @@
     --looseSpaceLyt: calc(var(--spaceLyt) * 3);
     /* Palette */
     --black: rgb(50, 50, 50);
-    --white: white;
+    --white: rgb(245, 245, 245);
     --whiteHvr: rgb(200, 200, 200);
     --grey: rgb(91, 91, 91);
     --greyHvr: rgb(130, 130, 130);
@@ -50,25 +50,79 @@ body {
     flex-direction: column;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
 }
 
 /*>--------------- { Popup } ---------------<*/
-#bgPopup {
+#popupInfo {
     position: absolute;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100vw;
     height: 100vh;
+    padding: 5vh 10vw;
+    box-sizing: border-box;
     background-color: rgb(65, 65, 65, .65);
     animation: fade-in .3s ease forwards;
     z-index: 2000;
 }
 
+#popupInfo > textarea {
+    flex-grow: 1;
+    width: 100%;
+    padding: var(--tightSpaceLyt);
+    background-color: var(--white);
+    box-sizing: border-box;
+    resize: none;
+}
+
+#popupInfo > span {
+    flex: 4;
+    width: 100%;
+    padding: var(--spaceLyt);
+    box-sizing: border-box;
+    word-wrap: break-word;
+    text-align: justify;
+    background-color: var(--white);
+    border-radius: var(--spaceLyt);
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-size: .9rem;
+    animation: zoom-in .3s ease forwards;
+}
+    #popupInfo > span h1 { /*TODO*/
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    #popupInfo > span h2 { /*TODO*/
+        font-size: 1.25rem;
+        margin-bottom: .75rem;
+    }
+    #popupInfo > span p { /*TODO*/
+        margin: .5rem 0;
+    }
+    #popupInfo > span code { /*TODO*/
+        background-color: #eee;
+        padding: .12rem .25rem;
+        border-radius: .78rem;
+    }
+    #popupInfo > span pre { /*TODO*/
+        background-color: #eee;
+        padding: .62rem;
+        border-radius: 5px;
+        overflow-x: auto;
+    }
+    #popupInfo > span a { /*TODO*/
+        color: var(--blue);
+        text-decoration: underline;
+    }
+
 /*>--------------- { Dropdown } ---------------<*/
 #dropdownIcon {
     position: absolute;
-    width: calc(100% - (15px * 2)); /*width - margin*/
+    width: calc(100vw - (15px * 2)); /*width - margin*/
     align-self: center;
     margin-block: var(--tightSpaceLyt);
     border: 1px solid var(--black);
@@ -114,16 +168,16 @@ body {
 /*>--------------- { Delete Struct } ---------------<*/
 #deleteStruct {
     position: absolute;
+    width: 20vw;
+    height: 4.5vh;
     bottom: var(--looseSpaceLyt);
-    width: 60%;
-    height: 50px;
     background: var(--red);
     color: var(--white);
     border-radius: var(--looseSpaceLyt);
     align-self: center;
+    transition: all .3s ease;
     z-index: 900;
 }
-
     #deleteStruct::before {
         content: "";
         position: absolute;
@@ -138,9 +192,24 @@ body {
         mask-repeat: no-repeat;
         -webkit-mask-position: center;
         mask-position: center;
-        -webkit-mask-size: contain;
-        mask-size: contain;
+        -webkit-mask-size: auto 80%;
+        mask-size: auto 80%;
     }
+    #deleteStruct:has(>.dragStruct) {
+        background-color: var(--redHvr);
+        width: 30vh;
+        height: 7vh;
+    }
+@media (max-width: 700px) {
+    #deleteStruct {
+        width: 25vw;
+        height: 7vh;
+    }
+        #deleteStruct:has(>.dragStruct) {
+            width: 35vh;
+            height: 10vh;
+        }
+}
 
 /*>--------------- { Banner } ---------------<*/
 header {
@@ -245,25 +314,6 @@ main {
 @keyframes zoom-in {
     from {
         transform: scale(0);
-    }
-
-    to {
-        transform: scale(1);
-    }
-}
-
-@keyframes expand-down {
-    from {
-        transform: scale(1, 0);
-    }
-
-    to {
-        transform: scale(1);
-    }
-}
-@keyframes expand-right {
-    from {
-        transform: scale(0, 1);
     }
 
     to {

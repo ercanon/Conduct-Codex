@@ -16,9 +16,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     delStruct.addEventListener("dragover", HoverHandeler.dragOver);
 
     StructureHandler.dropdownIcon = document.getElementById("dropdownIcon");
-    const dropdownList = StructureHandler.dropdownIcon.lastElementChild;
+    StructureHandler.popupInfo = document.getElementById("popupInfo");
+    const textEdit = StructureHandler.popupInfo.firstElementChild
+    const textResult = StructureHandler.popupInfo.lastElementChild
+    StructureHandler.popupInfo.addEventListener("click", (event) => {
+        if (event.target === StructureHandler.popupInfo)
+            StructureHandler.popupInfo.classList.add("hide")
+    });
+    textEdit.addEventListener("input", (event) =>
+        textResult.innerHTML = marked.parse(event.currentTarget.value.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, "")));
+    textEdit.addEventListener("change", (event) =>
+        console.log("Sending Data"));
 
     /*>---------- [ Initizalize dropdown ] ----------<*/
+    const dropdownList = StructureHandler.dropdownIcon.lastElementChild;
     fetch("https://cdn.jsdelivr.net/npm/@iconify-json/game-icons/icons.json")
         .then((response) =>
             response.json())
@@ -75,16 +86,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         StructureHandler.dropdownIcon.client = null;
         StructureHandler.dropdownIcon.classList.add("hide")
         HoverHandeler.resetIndicate(false);
+        delStruct.style.bottom = btnState ? "" : "-10vh";
 
         //Change Mode Elements
         for (const struct of document.getElementsByClassName("dynStruct")) {
             struct.draggable = btnState;
-            struct.style.cursor = btnState ? "grab" : "";
             HoverHandeler.prepareHover(struct, btnState);
-            for (const child of struct.children) {
-                if (!child.classList.contains("dynStruct"))
-                    child.style.pointerEvents = btnState ? "none" : "";
-            }
         }
         for (const button of document.getElementsByClassName("addStructBtn"))
             button.classList.toggle("hide", btnState);
@@ -100,6 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 class StructureHandler {
     static dropdownIcon = null;
+    static popupInfo = null;
     static #structArray = [
         `<button class="addStructBtn"></button>`,
         `<section class="dynStruct" draggable="false">
@@ -137,13 +145,17 @@ class StructureHandler {
                 dynStruct.insertAdjacentHTML("beforeend", StructureHandler.#structArray[0]);
 
             const fistChild = dynStruct.firstElementChild;
-            if (dynStruct.localName === "section") {
-                fistChild.addEventListener("input", StructureHandler.#changeColor);
-                //fistChild.addEventListener("change", (event) => { });
-                fistChild.dispatchEvent(new Event("input"));
+            switch (dynStruct.localName) {
+                case "section":
+                    fistChild.addEventListener("input", StructureHandler.#changeColor);
+                    //fistChild.addEventListener("change", (event) => { });
+                    fistChild.dispatchEvent(new Event("input"));
+                    break;
+                case "div":
+                    dynStruct.addEventListener("dblclick", StructureHandler.#popUp);
+                    fistChild.addEventListener("click", StructureHandler.#dropdownCall);
+                    break;
             }
-            else if (fistChild.localName === "iconify-icon")
-                fistChild.addEventListener("click", StructureHandler.#dropdownCall);
         }
 
         /*>---------- [ Add Button Action ] ----------<*/
@@ -156,21 +168,6 @@ class StructureHandler {
     static #changeColor(event) {
         event.currentTarget.parentNode.style.setProperty("--sectionColor", event.currentTarget.value);
     }
-    static delete(target) {
-        target.querySelectorAll(".addStructBtn")?.forEach((btn) =>
-            btn.removeEventListener("click", StructureHandler.createStruct));
-
-        target.querySelectorAll(".section-color")?.forEach((color) => {
-            color.removeEventListener("input", StructureHandler.#changeColor)
-            //color.removeEventListener("change", StructureHandler.#dropdownCall)
-        });
-
-        target.querySelectorAll(".addStructBtn")?.forEach((btn) =>
-            btn.removeEventListener("click", StructureHandler.createStruct));
-
-        target.querySelectorAll(".dynStruct")?.forEach((struct) =>
-            HoverHandeler.prepareHover(struct, false));
-    }
 
     static #dropdownCall(event) {
         const rect = event.currentTarget.getBoundingClientRect();
@@ -178,6 +175,10 @@ class StructureHandler {
 
         StructureHandler.dropdownIcon.client = event.currentTarget;
         StructureHandler.dropdownIcon.classList.remove("hide")
+    }
+
+    static #popUp(event) {
+        StructureHandler.popupInfo.classList.remove("hide")
     }
 }
 
@@ -196,7 +197,7 @@ class HoverHandeler {
         Object.assign(HoverHandeler.indStruct.style, {
             transform: "",
             width: "",
-            height: HoverHandeler.#selectedStruct?.localName === "section" ? "10px" : "5px",
+            height: "",
             transition: "none"
         });
 
@@ -223,11 +224,14 @@ class HoverHandeler {
     static #dragStart(event) {
         event.stopPropagation();
         HoverHandeler.resetIndicate(true);
-        HoverHandeler.#selectedStruct = event.currentTarget;
+        HoverHandeler.#selectedStruct = {
+            selectedName: event.currentTarget.localName,
+            parentName: event.currentTarget.parentNode.localName
+        };
 
+        const target = event.target;
         requestAnimationFrame(() => {
-            HoverHandeler.#selectedStruct.ogParentName = HoverHandeler.#selectedStruct.parentNode.localName;
-            HoverHandeler.#selectedStruct.replaceWith(HoverHandeler.indStruct);
+            target.replaceWith(HoverHandeler.indStruct);
         });
     }
     static dragOver(event) {
@@ -235,23 +239,25 @@ class HoverHandeler {
         event.stopPropagation();
 
         const { currentTarget, clientX, clientY } = event;
-        const selectedName = HoverHandeler.#selectedStruct.localName;
-        if (selectedName === currentTarget.localName) {
-            const rect = currentTarget.getBoundingClientRect();
-            const isLeftOrTop = selectedName === "div"
-                ? clientX < rect.left + rect.width / 2
-                : clientY < rect.top + rect.height / 2;
+        const { selectedName, parentName } = HoverHandeler.#selectedStruct;
+        if (event.currentTarget.draggable) {
+            if (selectedName === currentTarget.localName) {
+                const rect = currentTarget.getBoundingClientRect();
+                const isLeftOrTop = selectedName === "div"
+                    ? clientX < rect.left + rect.width / 2
+                    : clientY < rect.top + rect.height / 2;
 
-            currentTarget.parentNode.insertBefore(
-                HoverHandeler.indStruct,
-                isLeftOrTop ? currentTarget : currentTarget.nextSibling
-            );
+                currentTarget.parentNode.insertBefore(
+                    HoverHandeler.indStruct,
+                    isLeftOrTop ? currentTarget : currentTarget.nextSibling
+                );
+            }
+            else if (parentName === currentTarget.localName)
+                currentTarget.insertBefore(
+                    HoverHandeler.indStruct,
+                    currentTarget.lastElementChild
+                );
         }
-        else if (HoverHandeler.#selectedStruct.ogParentName === currentTarget.localName)
-            currentTarget.insertBefore(
-                HoverHandeler.indStruct,
-                currentTarget.lastElementChild
-            );
         else if (currentTarget.id === "deleteStruct")
             currentTarget.appendChild(HoverHandeler.indStruct);
     }
@@ -260,9 +266,9 @@ class HoverHandeler {
         event.stopPropagation();
 
         if (HoverHandeler.indStruct.parentNode.id === "deleteStruct")
-            StructureHandler.delete(event.currentTarget);
+            event.currentTarget.remove();
         else 
-            HoverHandeler.indStruct.replaceWith(HoverHandeler.#selectedStruct);
+            HoverHandeler.indStruct.replaceWith(event.currentTarget);
         document.body.appendChild(HoverHandeler.indStruct);
 
         HoverHandeler.#selectedStruct.ogParentName = null;
