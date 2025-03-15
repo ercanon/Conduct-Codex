@@ -33,17 +33,17 @@ section.dynStruct > input {
     font-weight: bold;
 }
 
-.section-color {
+section.dynStruct >.section-color {
     aspect-ratio: 1 / 1;
     cursor: pointer;
 }
-    .section-color::-webkit-color-swatch-wrapper {
+    section.dynStruct > .section-color::-webkit-color-swatch-wrapper {
         border: 2px solid var(--whiteHvr);
         padding: 0;
         border-radius: 5px;
     }
 
-.section-usage {
+section.dynStruct > .section-usage {
     min-width: 20vw;
     text-align: right;
     font-size: 1.2rem !important;
@@ -65,7 +65,7 @@ article.dynStruct {
     gap: var(--tightSpaceLyt);
 }
 
-.article-type {
+article.dynStruct > .article-type {
     grid-column: 1/-1;
     font-size: 1.07rem;
 }
@@ -95,7 +95,7 @@ div.dynStruct > iconify-icon {
         color: var(--whiteHvr);
     }
 
-.div-title {
+div.dynStruct > .entry-title {
     font-size: 1.2rem;
     font-weight: bold;
 }
