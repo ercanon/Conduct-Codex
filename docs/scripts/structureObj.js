@@ -2,21 +2,39 @@
 document.addEventListener("DOMContentLoaded", async () => {
     isHost = !(new URLSearchParams(window.location.search).get("data"));
 
+    const elemList = [
+        "toggleMode",
+        "dataUpload",
+        "dropdownIcon",
+        "indStruct",
+        "deleteStruct"
+    ].reduce((obj, id) => {
+        obj[id] = document.getElementById(id);
+        return obj;
+    }, {});
+
     if (!isHost) {
-        for (const id of ["toggleMode", "dataUpload", "dropdownIcon", "#indStruct"])
-            document.getElementById(id).remove()
+        for (const elem of elemList)
+            elem.remove()
         return;
     }
 
     /*>---------- [ initialize Components ] ----------<*/
+    const {
+        toggleMode,
+        dataUpload,
+        dropdownIcon,
+        indStruct,
+        deleteStruct
+    } = elemList;
+
     const main = document.body.querySelector("main");
-    HoverHandler.prepareHover(main, document.getElementById("indStruct"));
+    HoverHandler.prepareHover(main, indStruct);
     StructureHandler.createStruct(main);
 
-    const delStruct = document.getElementById("deleteStruct");
-    HoverHandler.prepareHover(delStruct);
+    HoverHandler.prepareHover(deleteStruct);
 
-    StructureHandler.dropdownIcon = document.getElementById("dropdownIcon");
+    StructureHandler.dropdownIcon = dropdownIcon;
     StructureHandler.preparePopup(document.getElementById("popupInfo"));
 
     /*>---------- [ Initizalize dropdown ] ----------<*/
@@ -53,15 +71,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             StructureHandler.dropdownIcon.firstElementChild.addEventListener("input", (event) => {
                 const textInput = event.currentTarget.value.toLowerCase();
                 [...dropdownList.children].forEach(async (icon) =>
-                    icon.classList.toggle("hide", !icon.lastElementChild.textContent.toLowerCase().includes(textInput)));
+                    icon.hidden = !icon.lastElementChild.textContent.toLowerCase().includes(textInput));
             });
         })
         .catch((error) =>
             console.error("Error loading icons", error));
 
     /*>---------- [ initialize Mode Change ] ----------<*/
-    const btnMode = document.getElementById("toggleMode")
-    btnMode.addEventListener("click", (event) => {
+    toggleMode.addEventListener("click", (event) => {
         //Determine Mode
         const { currentTarget } = event;
         const btnState = currentTarget.innerText === "Edit Mode";
@@ -70,22 +87,41 @@ document.addEventListener("DOMContentLoaded", async () => {
         //Clear utils
         StructureHandler.dropdownClear()
         HoverHandler.resetIndicate(false);
-        for (const elem of [delStruct, currentTarget])
+        for (const elem of [deleteStruct, currentTarget])
             elem.setAttribute("data-mode", currentTarget.innerText.split(" ")[0]);
 
         //Change Mode Elements
         for (const struct of document.getElementsByClassName("dynStruct"))
             struct.draggable = btnState;
         for (const button of document.getElementsByClassName("addStructBtn"))
-            button.classList.toggle("hide", btnState);
+            button.hidden = btnState;
     });
 
     /*>---------- [ Initialize Data Handler ] ----------<*/
-    document.getElementById("dataUpload").addEventListener("click", () => {
+    const childUpload = dataUpload.firstElementChild;
+    dataUpload.addEventListener("click", async (event) => 
+        childUpload.click());
+    childUpload.addEventListener("change", async (event) => {
+
     });
-    document.getElementById("dataDownload").addEventListener("click", () => {
+    document.getElementById("dataDownload").addEventListener("click", (event) => {
+        const jsonContent = JSON.stringify({ test: "test" });
+
+        if (!jsonContent)
+            return alert("No hay contenido JSON para descargar.");
+
+        const dnld = event.currentTarget.firstElementChild;
+        const url = URL.createObjectURL(new Blob([jsonContent], { type: "application/json" }));
+        dnld.href = url;
+        dnld.click();
+        requestAnimationFrame(() =>
+            URL.revokeObjectURL(url));
     });
 });
+
+function dataStringify() {
+
+}
 
 class StructureHandler {
     static dropdownIcon = null;
@@ -156,7 +192,7 @@ class StructureHandler {
         StructureHandler.dropdownIcon.style.transform = `translateY(${rect.bottom}px)`;
 
         const active = StructureHandler.dropdownIcon.client === event.currentTarget
-        StructureHandler.dropdownIcon.classList.toggle("hide", active)
+        StructureHandler.dropdownIcon.hidden = active;
         if (active)
             StructureHandler.dropdownIcon.client = null;
         else
@@ -164,13 +200,13 @@ class StructureHandler {
     }
     static dropdownClear() {
         StructureHandler.dropdownIcon.client = null;
-        StructureHandler.dropdownIcon.classList.add("hide");
+        StructureHandler.dropdownIcon.hidden = true;
     }
 
     static preparePopup(target) {
         target.addEventListener("click", (event) => {
             if (event.target === target)
-                target.classList.add("hide");
+                target.hidden = true;
         }); //TODO
 
         const textEdit = target.firstElementChild;
@@ -196,7 +232,7 @@ class StructureHandler {
             getTitleMatch(sectionTitle, section);
             getTitleMatch(entryTitle, currentTarget);
 
-            StructureHandler.#popupInfo.parentNode.classList.remove("hide");
+            StructureHandler.#popupInfo.parentNode.hidden = false;
         }
     }
 }
@@ -256,7 +292,7 @@ class HoverHandler {
         };
 
         requestAnimationFrame(() => {
-            target.classList.add("hide");
+            target.hidden = true;
             target.parentNode.insertBefore(HoverHandler.#indStruct, target);
         });
     }
@@ -301,7 +337,7 @@ class HoverHandler {
             HoverHandler.#indStruct.replaceWith(target);
 
         document.body.appendChild(HoverHandler.#indStruct);
-        target.classList.remove("hide");
+        target.hidden = false;
         HoverHandler.resetIndicate(false);
     }
 }

@@ -10,7 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon/dist/iconify-icon.min.js"></script>
 
     <!--Lib-->
-    <script src="https://cdn.jsdelivr.net/npm/@iconify/iconify/dist/iconify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/peerjs/dist/peerjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -24,7 +23,7 @@
 <body>
     <!--Utils-->
     <span id="deleteStruct" data-mode="Edit"></span>
-    <div id="popupInfo" class="hide">
+    <div id="popupInfo" hidden>
         <textarea placeholder="Write in Markdown(.md)..."></textarea>
         <section>
             <h1 data-title="entry-title"></h1>
@@ -32,7 +31,7 @@
             <span></span>             
         </section>
     </div>
-    <div id="dropdownIcon" class="hide">
+    <div id="dropdownIcon" hidden>
         <input type="text" placeholder="Search icons...">
         <span></span>
     </div>
@@ -41,8 +40,8 @@
     <header>
         <h1>Conduct Codex</h1>
         <button id="toggleMode" data-mode="Edit"> Edit Mode </button>
-        <button id="dataUpload"></button>
-        <button id="dataDownload"></button>
+        <button id="dataUpload"> <input type="file" accept=".kprl" hidden> </button>
+        <button id="dataDownload"> <a download="CodexConduct_data.kprl" hidden></a></button>
     </header>
 
     <!--Web Contents-->
