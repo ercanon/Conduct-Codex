@@ -10,26 +10,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     /*>---------- [ initialize Components ] ----------<*/
     const main = document.body.querySelector("main");
-    HoverHandeler.prepareHover(main, document.getElementById("indStruct"));
+    HoverHandler.prepareHover(main, document.getElementById("indStruct"));
     StructureHandler.createStruct(main);
 
     const delStruct = document.getElementById("deleteStruct");
-    HoverHandeler.prepareHover(delStruct);
-
-    StructureHandler.popupInfo = document.getElementById("popupInfo");
-    StructureHandler.popupInfo.addEventListener("click", (event) => {
-        if (event.target === StructureHandler.popupInfo)
-            StructureHandler.popupInfo.classList.add("hide")
-    }); //TODO
-
-    const textEdit = StructureHandler.popupInfo.firstElementChild;
-    const textResult = StructureHandler.popupInfo.lastElementChild;
-    textEdit.addEventListener("input", (event) =>
-        textResult.innerHTML = marked.parse(event.currentTarget.value.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, "")));
-    textEdit.addEventListener("change", (event) =>
-        console.log("Sending Data"));
+    HoverHandler.prepareHover(delStruct);
 
     StructureHandler.dropdownIcon = document.getElementById("dropdownIcon");
+    StructureHandler.preparePopup(document.getElementById("popupInfo"));
 
     /*>---------- [ Initizalize dropdown ] ----------<*/
     const dropdownList = StructureHandler.dropdownIcon.lastElementChild;
@@ -81,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         //Clear utils
         StructureHandler.dropdownClear()
-        HoverHandeler.resetIndicate(false);
+        HoverHandler.resetIndicate(false);
         for (const elem of [delStruct, currentTarget])
             elem.setAttribute("data-mode", currentTarget.innerText.split(" ")[0]);
 
@@ -92,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             button.classList.toggle("hide", btnState);
     });
 
-    /*>---------- [ Initialize Data Handeler ] ----------<*/
+    /*>---------- [ Initialize Data Handler ] ----------<*/
     document.getElementById("dataUpload").addEventListener("click", () => {
     });
     document.getElementById("dataDownload").addEventListener("click", () => {
@@ -101,7 +89,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 class StructureHandler {
     static dropdownIcon = null;
-    static popupInfo = null;
+    static #popupInfo = null;
     static #structArray = [
         `<button class="addStructBtn"></button>`,
         `<section class="dynStruct" draggable="false">
@@ -114,8 +102,8 @@ class StructureHandler {
          </article>`,
         `<div class="dynStruct" draggable="false">
             <iconify-icon icon="material-symbols:add-2-rounded" width="unset" height="unset" noobserver></iconify-icon>
-            <input type="text" class="div-title" placeholder = "Title">
-            <input type="text" class="div-sub" placeholder = "Subtitle">
+            <input type="text" class="entry-title" placeholder = "Title">
+            <input type="text" class="entry-sub" placeholder = "Subtitle">
          </div>`
     ];
     static #parserDOM = document.createRange();
@@ -146,7 +134,7 @@ class StructureHandler {
                     fistChild.dispatchEvent(new Event("input"));
                     break;
                 case "div":
-                    dynStruct.addEventListener("dblclick", StructureHandler.#popUp);
+                    dynStruct.addEventListener("dblclick", StructureHandler.#openPopup);
                     fistChild.addEventListener("click", StructureHandler.#dropdownCall);
                     break;
             }
@@ -179,48 +167,76 @@ class StructureHandler {
         StructureHandler.dropdownIcon.classList.add("hide");
     }
 
-    static #popUp(event) {
-        if (!event.currentTarget.draggable)
-            StructureHandler.popupInfo.classList.remove("hide")
+    static preparePopup(target) {
+        target.addEventListener("click", (event) => {
+            if (event.target === target)
+                target.classList.add("hide");
+        }); //TODO
+
+        const textEdit = target.firstElementChild;
+        const textResult = target.querySelector("section > span");
+        textEdit.addEventListener("input", (event) =>
+            textResult.innerHTML = marked.parse(event.currentTarget.value.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, "")));
+        textEdit.addEventListener("change", (event) =>
+            console.log("Sending Data"));
+
+        StructureHandler.#popupInfo = target.lastElementChild;
+    }
+    static #openPopup(event) {
+        const { currentTarget } = event;
+        if (!currentTarget.draggable) {
+            const [entryTitle, sectionTitle] = StructureHandler.#popupInfo.children;
+            const section = currentTarget.closest("section.dynStruct");
+            const colorVar = "--sectionColor";
+
+            const getTitleMatch = (attribute, target) =>
+                attribute.innerText = target.querySelector(`.${attribute.getAttribute("data-title")}`)?.value || "";
+
+            StructureHandler.#popupInfo.style.setProperty(colorVar, section.style.getPropertyValue(colorVar));
+            getTitleMatch(sectionTitle, section);
+            getTitleMatch(entryTitle, currentTarget);
+
+            StructureHandler.#popupInfo.parentNode.classList.remove("hide");
+        }
     }
 }
 
-class HoverHandeler {
+class HoverHandler {
     static #indStruct = null;
     static #selectedStruct = null;
 
     static prepareHover(target, indicator) {
         if (indicator) {
-            HoverHandeler.#indStruct = indicator;
-            target.addEventListener("mousemove", HoverHandeler.#hoverStruct);
-            target.addEventListener("dragstart", HoverHandeler.#dragStart);
-            target.addEventListener("dragend", HoverHandeler.#dragDrop);
+            HoverHandler.#indStruct = indicator;
+            target.addEventListener("mousemove", HoverHandler.#hoverStruct);
+            target.addEventListener("dragstart", HoverHandler.#dragStart);
+            target.addEventListener("dragend", HoverHandler.#dragDrop);
         }
-        target.addEventListener("dragover", HoverHandeler.#dragOver);
+        target.addEventListener("dragover", HoverHandler.#dragOver);
     }
     static resetIndicate(dragging) {
-        Object.assign(HoverHandeler.#indStruct.style, {
+        Object.assign(HoverHandler.#indStruct.style, {
             transform: "",
             width: "",
             height: "",
             transition: "none"
         });
 
-        HoverHandeler.#selectedStruct = null;
-        HoverHandeler.#indStruct.classList.toggle("dragStruct", dragging);
+        HoverHandler.#selectedStruct = null;
+        HoverHandler.#indStruct.classList.toggle("dragStruct", dragging);
     }
 
     static #hoverStruct(event) {
         event.stopPropagation();
-        if (HoverHandeler.#selectedStruct || !event.target.draggable)
+        if (HoverHandler.#selectedStruct || !event.target.draggable)
             return;
 
         const rect = event.target.getBoundingClientRect();
-        const styleValues = event.target === HoverHandeler.#selectedStruct
+        const styleValues = event.target === HoverHandler.#selectedStruct
             ? { width: "0", height: "0", transition: "none" }
             : { width: `${rect.width}px`, height: `${rect.height}px`, transition: "" };
 
-        Object.assign(HoverHandeler.#indStruct.style, {
+        Object.assign(HoverHandler.#indStruct.style, {
             transform: `translate(${rect.left}px, ${rect.top}px)`,
             ...styleValues
         });
@@ -233,15 +249,15 @@ class HoverHandeler {
         if (!target.draggable)
             return;
 
-        HoverHandeler.resetIndicate(true);
-        HoverHandeler.#selectedStruct = {
+        HoverHandler.resetIndicate(true);
+        HoverHandler.#selectedStruct = {
             selectedName: target.localName,
             parentName: target.parentNode.localName
         };
 
         requestAnimationFrame(() => {
             target.classList.add("hide");
-            target.parentNode.insertBefore(HoverHandeler.#indStruct, target);
+            target.parentNode.insertBefore(HoverHandler.#indStruct, target);
         });
     }
     static #dragOver(event) {
@@ -250,11 +266,11 @@ class HoverHandeler {
 
         const { target } = event;
         if (target.id === "deleteStruct")
-            return target.appendChild(HoverHandeler.#indStruct);
+            return target.appendChild(HoverHandler.#indStruct);
         else if (!target.draggable)
             return;
 
-        const { selectedName, parentName } = HoverHandeler.#selectedStruct;
+        const { selectedName, parentName } = HoverHandler.#selectedStruct;
         if (selectedName === target.localName) {
             const rect = target.getBoundingClientRect();
             const isLeftOrTop = selectedName === "div"
@@ -262,13 +278,13 @@ class HoverHandeler {
                 : event.clientY < rect.top + rect.height / 2;
 
             target.parentNode.insertBefore(
-                HoverHandeler.#indStruct,
+                HoverHandler.#indStruct,
                 isLeftOrTop ? target : target.nextSibling
             );
         }
         else if (parentName === target.localName)
             target.insertBefore(
-                HoverHandeler.#indStruct,
+                HoverHandler.#indStruct,
                 target.lastElementChild
             );
     }
@@ -279,13 +295,13 @@ class HoverHandeler {
         if (!target.draggable)
             return;
 
-        if (HoverHandeler.#indStruct.parentNode.id === "deleteStruct")
+        if (HoverHandler.#indStruct.parentNode.id === "deleteStruct")
             target.remove();
         else 
-            HoverHandeler.#indStruct.replaceWith(target);
+            HoverHandler.#indStruct.replaceWith(target);
 
-        document.body.appendChild(HoverHandeler.#indStruct);
+        document.body.appendChild(HoverHandler.#indStruct);
         target.classList.remove("hide");
-        HoverHandeler.resetIndicate(false);
+        HoverHandler.resetIndicate(false);
     }
 }

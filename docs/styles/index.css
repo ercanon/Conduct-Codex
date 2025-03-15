@@ -57,7 +57,6 @@ body {
 #popupInfo {
     position: absolute;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100vw;
@@ -66,20 +65,50 @@ body {
     box-sizing: border-box;
     background-color: rgb(65, 65, 65, .65);
     animation: fade-in .3s ease forwards;
+    gap: var(--spaceLyt);
     z-index: 2000;
 }
 
 #popupInfo > textarea {
-    flex-grow: 1;
-    width: 100%;
+    position: absolute;
+    top: 0;
+    width: 90%;
+    height: 15%;
+    margin-block: var(--looseSpaceLyt);
     padding: var(--tightSpaceLyt);
     background-color: var(--white);
     box-sizing: border-box;
-    resize: none;
+    resize: horizontal;
 }
 
-#popupInfo > span {
-    flex: 4;
+#popupInfo > section {
+    position: relative;
+    display: grid;
+    align-items: center;
+    grid-template-rows: min-content;
+    grid-template-columns: 1fr min-content;
+    gap: var(--tightSpaceLyt);
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--sectionColor);
+    padding: var(--spaceLyt);
+    padding-top: var(--tightSpaceLyt);
+    border-radius: var(--spaceLyt);
+    animation: zoom-in .3s ease forwards;
+}
+
+#popupInfo section > h1 {
+    color: var(--white);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+#popupInfo section > h2 {
+    text-align: right;
+    font-size: 1.2rem !important;
+}
+
+#popupInfo section > span {
+    grid-column: 1/-1;
     width: 100%;
     padding: var(--spaceLyt);
     box-sizing: border-box;
@@ -89,32 +118,31 @@ body {
     border-radius: var(--spaceLyt);
     overflow-y: auto;
     overflow-x: hidden;
-    font-size: .9rem;
-    animation: zoom-in .3s ease forwards;
+    font-size: 1rem;
 }
-    #popupInfo > span h1 { /*TODO*/
+    #popupInfo span > h1 { /*TODO*/
         font-size: 1.5rem;
         margin-bottom: 1rem;
     }
-    #popupInfo > span h2 { /*TODO*/
+    #popupInfo span > h2 { /*TODO*/
         font-size: 1.25rem;
         margin-bottom: .75rem;
     }
-    #popupInfo > span p { /*TODO*/
+    #popupInfo span > p { /*TODO*/
         margin: .5rem 0;
     }
-    #popupInfo > span code { /*TODO*/
+    #popupInfo span > code { /*TODO*/
         background-color: #eee;
         padding: .12rem .25rem;
         border-radius: .78rem;
     }
-    #popupInfo > span pre { /*TODO*/
+    #popupInfo span > pre { /*TODO*/
         background-color: #eee;
         padding: .62rem;
         border-radius: 5px;
         overflow-x: auto;
     }
-    #popupInfo > span a { /*TODO*/
+    #popupInfo span > a { /*TODO*/
         color: var(--blue);
         text-decoration: underline;
     }
