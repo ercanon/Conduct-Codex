@@ -95,7 +95,7 @@ div.dynStruct > iconify-icon {
         color: var(--whiteHvr);
     }
 
-div.dynStruct > .entry-title {
+div.dynStruct > .div-title {
     font-size: 1.2rem;
     font-weight: bold;
 }
