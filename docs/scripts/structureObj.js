@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 });
 
                 dropdownList.appendChild(figure);
-        });
+            });
 
             StructureHandler.dropdownIcon.addEventListener("mouseleave", StructureHandler.dropdownClear);
             StructureHandler.dropdownIcon.firstElementChild.addEventListener("input", (event) => {
@@ -260,26 +260,9 @@ class StructureHandler {
             DataHandler.execData("delete", [localName], id);
         target.remove();
     }
-    static async replaceStruct(target, position) {
-        position.replaceWith(target);
-
-        const { localName, id, parentNode, nextSibling } = target;
-
-        const targetData = await DataHandler.execData("get", [localName], id);
-        const childrenList = (await DataHandler.execData("getAll", [localName, "ParentID"]))
-            .filter((child) =>
-                child.id !== targetData.id);
-        const index = childrenList         
-            .findIndex((child) =>
-                child.id === nextSibling.id);
-
-        targetData.parent = parentNode.id || null;
-        childrenList.splice(index < 0 ? childrenList.length : index, 0, targetData);
-
-        for (const child of childrenList) {
-            await DataHandler.execData("delete", [localName], child.id)
-            await DataHandler.execData("put", [localName], child);
-        }
+    static replaceStruct(target, position) {
+        position.replaceWith(target)
+        DataHandler.storeInnerData([target.localName, target.id], { parent: target.parentNode.id || null })
     }
 
     static #changeColor(event) {
@@ -454,7 +437,7 @@ class HoverHandler {
 class DataHandler {
     static #dataBase = null;
     static #dbOrder = { section: 1, article: 2, div: 3 };
-    static #gistToken = "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";
+    static #gistToken = "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";
 
     static async setDataBase() {
         await new Promise((resolve, reject) => {
@@ -552,7 +535,7 @@ class DataHandler {
         );
     }
 
-    static setGist(data) {
+    static async setGist(data) {
         try {
             let response = await fetch("https://api.github.com/gists", {
                 method: "POST",
@@ -562,7 +545,7 @@ class DataHandler {
                 },
                 body: JSON.stringify({
                     public: false,
-                    files: { "data.json": data }
+                    files: { "conduct.json": data }
                 })
             });
 
