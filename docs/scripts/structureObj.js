@@ -1,6 +1,7 @@
 /*>--------------- { Web Initialization } ---------------<*/
 document.addEventListener("DOMContentLoaded", async () => {
-    isHost = !(new URLSearchParams(window.location.search).get("data"));
+    window.urlSearch = new URLSearchParams(window.location.hash.substring(1));
+    document.isHost = window.urlSearch.size <= 0;
 
     const elemList = [
         "toggleMode",
@@ -13,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return obj;
     }, {});
 
-    if (!isHost) {
+    if (!document.isHost) {
         for (const elem of Object.values(elemList))
             elem.remove()
         return;
@@ -62,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 nameFig.innerText = name;
                 figure.appendChild(nameFig);
 
-                figure.addEventListener("click", () => {
+                figure.addEventListener("click", async () => {
                     const { client } = StructureHandler.dropdownIcon;
                     if (client) {
                         StructureHandler.dropdownIcon.client.setAttribute("icon", iconName);
@@ -88,14 +89,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     toggleMode.addEventListener("click", (event) => {
         //Determine Mode
         const { currentTarget } = event;
-        const btnState = currentTarget.innerText === "Edit Mode";
-        currentTarget.innerText = btnState ? "Reorder Mode" : "Edit Mode";
+        const btnState = currentTarget.innerText === "Edit";
+        currentTarget.innerText = btnState ? "Reorder" : "Edit";
 
         //Clear utils
         StructureHandler.dropdownClear();
         HoverHandler.resetIndicate(false);
         for (const elem of [deleteStruct, currentTarget])
-            elem.setAttribute("data-mode", currentTarget.innerText.split(" ")[0]);
+            elem.setAttribute("data-mode", currentTarget.innerText);
 
         //Change Mode Elements
         for (const struct of document.getElementsByClassName("dynStruct"))
@@ -105,6 +106,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     /*>---------- [ Initialize Data Handler ] ----------<*/
+    document.getElementById("urlShare").addEventListener("click", async () => {
+        try {
+            const url = DataHandler.setGist(await DataHandler.exportFile());
+
+            if (navigator.share)
+                await navigator.share({
+                    title: "URL containing web Data",
+                    url,
+                });
+            else {
+                navigator.clipboard.writeText(url);
+                alert("URL copied to clipboard!");
+            }
+        }
+        catch (error) {
+            console.error("Error sharing URL:", error);
+        }
+    });
     const childUpload = dataUpload.firstElementChild;
     dataUpload.addEventListener("click", (event) => {
         if (event.target.localName !== "button")
@@ -179,7 +198,7 @@ class StructureHandler {
 
     static createStruct(event) {
         /*>---------- [ Initialitation ] ----------<*/
-        const { currentTarget, targetID, storeData } = event;
+        const { currentTarget, storeData } = event;
         const parent = currentTarget.localName === "button"
             ? currentTarget.parentNode
             : currentTarget;
@@ -197,15 +216,15 @@ class StructureHandler {
             if (lvl < StructureHandler.#structArray.length - 1) //Button Insertion
                 dynStruct.insertAdjacentHTML("beforeend", StructureHandler.#structArray[0]);
 
-            dynStruct.id = targetID || Date.now();
+            dynStruct.id = storeData?.id || Date.now();
             if (!storeData) 
-                DataHandler.execData("put", [dynStruct.localName, { id: dynStruct.id, parent: parent.id || null }], dynStruct.id);
+                DataHandler.execData("put", [dynStruct.localName], { id: dynStruct.id, parent: parent.id || null });
 
             for (const input of dynStruct.querySelectorAll(":scope > input")) {
                 const key = input.classList[0].split("-")[1]
-                input.addEventListener("change", (event) => {
+                input.addEventListener("change", async (event) => {
                     const { parentNode, value } = event.currentTarget
-                    DataHandler.storeInnerData([parentNode.localName, parentNode.id], { [key]: value })
+                    DataHandler.storeInnerData([parentNode.localName, parentNode.id], { [key]: value });
                 });
 
                 if (storeData?.[key])
@@ -236,14 +255,31 @@ class StructureHandler {
 
         return dynStruct;
     }
-    static delete(target) {
+    static async delete(target) {
         for (const { localName, id } of [...target.querySelectorAll(".dynStruct"), target])
-            DataHandler.execData("delete", [localName, id]);
+            DataHandler.execData("delete", [localName], id);
         target.remove();
     }
-    static replaceStruct(target, position) {
-        position.replaceWith(target)
-        DataHandler.storeInnerData([target.localName, target.id], { parent: target.parentNode.id || null })
+    static async replaceStruct(target, position) {
+        position.replaceWith(target);
+
+        const { localName, id, parentNode, nextSibling } = target;
+
+        const targetData = await DataHandler.execData("get", [localName], id);
+        const childrenList = (await DataHandler.execData("getAll", [localName, "ParentID"]))
+            .filter((child) =>
+                child.id !== targetData.id);
+        const index = childrenList         
+            .findIndex((child) =>
+                child.id === nextSibling.id);
+
+        targetData.parent = parentNode.id || null;
+        childrenList.splice(index < 0 ? childrenList.length : index, 0, targetData);
+
+        for (const child of childrenList) {
+            await DataHandler.execData("delete", [localName], child.id)
+            await DataHandler.execData("put", [localName], child);
+        }
     }
 
     static #changeColor(event) {
@@ -278,10 +314,10 @@ class StructureHandler {
         const textResult = popup.querySelector("section > span");
         textEdit.addEventListener("input", (event) =>
             textResult.innerHTML = marked.parse(event.currentTarget.value.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, "")));
-        textEdit.addEventListener("change", (event) => {
+        textEdit.addEventListener("change", async (event) => {
             const { client } = StructureHandler.#popupInfo || {};
-            if (client)
-                DataHandler.storeInnerData([client.localName, client.id], { rawMD: event.currentTarget.value })
+            if (client) 
+                DataHandler.storeInnerData([client.localName, client.id], { rawMD: event.currentTarget.value });
         });
 
         StructureHandler.#popupInfo = popup.lastElementChild;
@@ -292,7 +328,7 @@ class StructureHandler {
             const { children, style, parentNode, previousElementSibling } = StructureHandler.#popupInfo;
 
             StructureHandler.#popupInfo.client = currentTarget;
-            previousElementSibling.value = (await DataHandler.execData("get", [currentTarget.localName, currentTarget.id])).rawMD || "";
+            previousElementSibling.value = (await DataHandler.execData("get", [currentTarget.localName], currentTarget.id)).rawMD || "";
             previousElementSibling.dispatchEvent(new Event("input"));
 
             const getTitleMatch = (attribute, target) =>
@@ -418,6 +454,7 @@ class HoverHandler {
 class DataHandler {
     static #dataBase = null;
     static #dbOrder = { section: 1, article: 2, div: 3 };
+    static #gistToken = "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";
 
     static async setDataBase() {
         await new Promise((resolve, reject) => {
@@ -427,7 +464,8 @@ class DataHandler {
                 const dataBase = event.target.result;
                 for (const storeName of Object.keys(DataHandler.#dbOrder)) { 
                     if (!dataBase.objectStoreNames.contains(storeName))
-                        dataBase.createObjectStore(storeName);
+                        dataBase.createObjectStore(storeName, { keyPath: "id" })
+                            .createIndex("ParentID", "parent", { unique: false });
                 };
             };
 
@@ -441,23 +479,67 @@ class DataHandler {
         });
     }
 
+    static compressData({ id, ...data }) {
+        const compressed = fflate.deflateSync(fflate.strToU8(JSON.stringify(data)));
+        const base64 = btoa(String.fromCharCode(...compressed))
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+        return `${id}=${base64}&`;
+    }
+    //static async InsertURL([storeName], { id, ...data }) {
+    //    const regex = new RegExp(`(${id}=)[^&]*`);
+    //    let node = window.urlSearch.get(id) || "";
+
+    //    const compressed = fflate.deflateSync(fflate.strToU8(JSON.stringify(data)));
+    //    const base64 = btoa(String.fromCharCode(...compressed))
+    //        .replace(/\+/g, '-')
+    //        .replace(/\//g, '_')
+    //        .replace(/=+$/, '');
+
+    //    if (regex.test(node))
+    //        node = node.replace(regex, `$1${base64}`);
+    //    else
+    //        node += `${id}=${base64}&`;
+
+    //    window.urlSearch.set(storeName, node);
+    //    window.location.hash = window.urlSearch.toString();
+    //}
+    //static async parseURL() {
+    //    const { hash } = window.location;
+    //    input = input.replace(/-/g, '+').replace(/_/g, '/');
+    //    let binario = atob(input).split("").map(c => c.charCodeAt(0));
+    //    return new Uint8Array(binario);
+
+    //    let binario = base64UrlDecode(hash);            
+    //    let descomprimido = fflate.inflateSync(binario);
+    //    return new TextDecoder().decode(descomprimido); 
+    //}
+
     static async storeInnerData([storeName, pathID, objNode], data) {
         if (!data)
             throw new Error("Trying to save empty data.");
 
-        const request = await DataHandler.execData("get", [storeName, pathID]);
+        const request = await DataHandler.execData("get", [storeName], pathID);
         const storedData = request?.[objNode] || request;
         if (Array.isArray(storedData) && (Array.isArray(data) || typeof data !== "object"))
             data = [...storedData, ...data];
         else if (typeof storedData === "object" && !Array.isArray(storedData) && !Array.isArray(data))
             data = { ...storedData, ...data };
+        else
+            throw new Error("New data do not match previous data.");
 
-        DataHandler.execData("put", [storeName, data], pathID); //pathID and Data must be switched for "put" to work
+        DataHandler.execData("put", [storeName], data);
+        return data;
     }
-    static async execData(funcExec, [storeName, pathID], data) {
+    static async execData(funcExec, [storeName, indexName], data) {
+        if (typeof funcExec !== "string")
+            throw new Error("Function command is not string");
+
         return new Promise((resolve, reject) => {
             const transaction = DataHandler.#dataBase.transaction(storeName, "readwrite");
-            const request = transaction.objectStore(storeName)[funcExec](pathID, data);
+            const store = transaction.objectStore(storeName);
+            const request = (indexName ? store.index(indexName) : store)[funcExec](data);
 
             request.onsuccess = (event) => resolve(event.target.result || null);
             request.onerror = (event) => reject(event.target.error);
@@ -470,6 +552,28 @@ class DataHandler {
         );
     }
 
+    static setGist(data) {
+        try {
+            let response = await fetch("https://api.github.com/gists", {
+                method: "POST",
+                headers: {
+                    "Authorization": `token ${DataHandler.#gistToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    public: false,
+                    files: { "data.json": data }
+                })
+            });
+
+            let result = await response.json();
+            console.log("Gist creado:", result.html_url);
+            console.log("Raw JSON:", result.files["data.json"].raw_url);
+        }
+        catch (error) {
+            console.error("Error creating Gist:", error);
+        }
+    }
     static async parseData(dataDOM, target, needStoring = false) {
         const orderedKeys = Object.entries(dataDOM)
             .sort(([keyA], [keyB]) =>
@@ -478,12 +582,12 @@ class DataHandler {
         target = { null: target };
         for (const [storeName, data] of orderedKeys) {
             const structList = {};           
-            for (const [targetID, storeData] of Object.entries(data)) {
+            for (const storeData of data) {
                 const currentTarget = target[storeData.parent];
                 if (currentTarget) {
-                    structList[targetID] = StructureHandler.createStruct({ currentTarget, storeData, targetID });
+                    structList[storeData.id] = StructureHandler.createStruct({ currentTarget, storeData });
                     if (needStoring)
-                        await DataHandler.execData("put", [storeName, { id: targetID, ...storeData }], targetID);
+                        await DataHandler.execData("put", [storeName], storeData);
                 }
             }
             target = structList;
@@ -491,16 +595,8 @@ class DataHandler {
     }
     static async exportFile() {
         return Object.assign({}, ...await Promise.all(
-            [...DataHandler.#dataBase.objectStoreNames].map(async (storeName) => {
-                const dataList = await DataHandler.execData("getAll", [storeName]);
-
-                const storeData = dataList.reduce((obj, { id, ...data }) => {
-                    obj[id] = data;
-                    return obj;
-                }, {});
-
-                return { [storeName]: storeData };
-            })
+            [...DataHandler.#dataBase.objectStoreNames].map(async (storeName) =>
+                ({ [storeName]: await DataHandler.execData("getAll", [storeName]) }))
         ));
     }
 
