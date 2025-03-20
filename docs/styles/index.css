@@ -35,13 +35,14 @@ button {
 }
 
 input {
-    font-size: 1rem;
+    font-feature-settings: "lnum";
     color: var(--sectionColor);
     border: none;
     background: none;
     width: 100%;
     height: 85%;
     align-self: center;
+    font-family: inherit;
 }
 
 * {
@@ -100,6 +101,7 @@ body {
     padding-top: var(--tightSpaceLyt);
     border-radius: var(--spaceLyt);
     animation: zoom-in .3s ease forwards;
+    font-family: "Noto Sans", "Myriad Pro", Calibri, Helvetica, Arial, sans-serif;
     z-index: 2100;
 }
 
@@ -107,11 +109,13 @@ body {
     color: var(--white);
     font-size: 1.5rem;
     font-weight: bold;
+    font-family: Lora, "Calisto MT", "Bookman Old Style", Bookman, "Goudy Old Style", Garamond, "Hoefler Text", "Bitstream Charter", Georgia, serif;  
 }
 #popupInfo section > h2 {
     color: var(--white);
     text-align: right;
-    font-size: 1.2rem !important;
+    font-size: 1.2rem;
+    font-family: Lora, "Calisto MT", "Bookman Old Style", Bookman, "Goudy Old Style", Garamond, "Hoefler Text", "Bitstream Charter", Georgia, serif;  
 }
 
 #popupInfo section > span {
@@ -278,6 +282,15 @@ header > button {
     -webkit-mask-size: contain;
     mask-size: contain;
 }
+
+#urlShare {
+    aspect-ratio: 1/1;
+    background-color: var(--white);
+    --mask-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M14.5 15q.825 0 1.413-.587T16.5 13t-.587-1.412T14.5 11q-.375 0-.712.138t-.613.362L10.5 10.15v-.3l2.675-1.35q.275.225.613.363T14.5 9q.825 0 1.413-.587T16.5 7t-.587-1.412T14.5 5t-1.412.588T12.5 7v.15L9.825 8.5q-.275-.225-.612-.363T8.5 8q-.825 0-1.412.588T6.5 10t.588 1.413T8.5 12q.375 0 .713-.137t.612-.363l2.675 1.35V13q0 .825.588 1.413T14.5 15M6 18l-2.3 2.3q-.475.475-1.088.213T2 19.575V4q0-.825.588-1.412T4 2h16q.825 0 1.413.588T22 4v12q0 .825-.587 1.413T20 18z'/%3E%3C/svg%3E");
+}
+    #urlShare:hover {
+        background-color: var(--whiteHvr);
+    }
 
 #toggleMode {
     margin-inline: var(--tightSpaceLyt);
