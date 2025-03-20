@@ -108,7 +108,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     /*>---------- [ Initialize Data Handler ] ----------<*/
     document.getElementById("urlShare").addEventListener("click", async () => {
         try {
-            const url = DataHandler.setGist(await DataHandler.exportFile());
+            const response = await fetch("https://thingproxy.freeboard.io/fetch/https://dpaste.org/api/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    content: await DataHandler.exportFile(),
+                    lexer: "javascript", // Resaltado de sintaxis para JavaScript
+                    format: "json", // Respuesta en JSON
+                    expires: "never" // Nunca expira
+                })
+            })
+            const result = await response.text();
+            console.log("Enlace permanente:", result.url);
 
             if (navigator.share)
                 await navigator.share({
@@ -437,7 +448,6 @@ class HoverHandler {
 class DataHandler {
     static #dataBase = null;
     static #dbOrder = { section: 1, article: 2, div: 3 };
-    static #gistToken = "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";
 
     static async setDataBase() {
         await new Promise((resolve, reject) => {
@@ -465,9 +475,9 @@ class DataHandler {
     static compressData({ id, ...data }) {
         const compressed = fflate.deflateSync(fflate.strToU8(JSON.stringify(data)));
         const base64 = btoa(String.fromCharCode(...compressed))
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '');
+            .replace(/\+/g, "-")
+            .replace(/\//g, "_")
+            .replace(/=+$/, "");
         return `${id}=${base64}&`;
     }
     //static async InsertURL([storeName], { id, ...data }) {
@@ -535,28 +545,6 @@ class DataHandler {
         );
     }
 
-    static async setGist(data) {
-        try {
-            let response = await fetch("https://api.github.com/gists", {
-                method: "POST",
-                headers: {
-                    "Authorization": `token ${DataHandler.#gistToken}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    public: false,
-                    files: { "conduct.json": data }
-                })
-            });
-
-            let result = await response.json();
-            console.log("Gist creado:", result.html_url);
-            console.log("Raw JSON:", result.files["data.json"].raw_url);
-        }
-        catch (error) {
-            console.error("Error creating Gist:", error);
-        }
-    }
     static async parseData(dataDOM, target, needStoring = false) {
         const orderedKeys = Object.entries(dataDOM)
             .sort(([keyA], [keyB]) =>
