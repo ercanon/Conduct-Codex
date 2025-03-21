@@ -1,26 +1,35 @@
 /*>--------------- { Web Initialization } ---------------<*/
 document.addEventListener("DOMContentLoaded", async () => {
+    document.main = document.body.querySelector("main");
     window.urlSearch = new URLSearchParams(window.location.hash.substring(1));
-    document.isHost = window.urlSearch.size <= 0;
+    document.gistID = window.urlSearch.get("gistID");
+
+    StructureHandler.preparePopup(document.getElementById("popupInfo"));
 
     const elemList = [
         "toggleMode",
         "dataUpload",
         "dropdownIcon",
         "indStruct",
-        "deleteStruct"
+        "deleteStruct",
+        "infoInput"
     ].reduce((obj, id) => {
         obj[id] = document.getElementById(id);
         return obj;
     }, {});
 
-    if (!document.isHost) {
+    if (document.gistID) {
         for (const elem of Object.values(elemList))
             elem.remove()
+
+        const response = await fetch(`https://api.github.com/gists/${document.gistID}`);
+        const { content } = Object.values((await response.json()).files)[0];
+        DataHandler.parseData(JSON.parse(content), document.main);
         return;
     }
 
     /*>---------- [ initialize Components ] ----------<*/
+    window.location.hash = "gistID="
     const {
         toggleMode,
         dataUpload,
@@ -29,13 +38,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         deleteStruct
     } = elemList;
 
-    document.main = document.body.querySelector("main");
     HoverHandler.prepareHover(document.main, indStruct);
     StructureHandler.createStruct({ currentTarget: document.main });
 
     HoverHandler.prepareHover(deleteStruct);
-
-    StructureHandler.preparePopup(document.getElementById("popupInfo"));
 
     /*>---------- [ initialize DataBase ] ----------<*/
     DataHandler.setDataBase(document.main);
@@ -106,35 +112,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     /*>---------- [ Initialize Data Handler ] ----------<*/
-    document.getElementById("urlShare").addEventListener("click", async () => {
-        try {
-            const response = await fetch("https://thingproxy.freeboard.io/fetch/https://dpaste.org/api/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    content: await DataHandler.exportFile(),
-                    lexer: "javascript", // Resaltado de sintaxis para JavaScript
-                    format: "json", // Respuesta en JSON
-                    expires: "never" // Nunca expira
-                })
-            })
-            const result = await response.text();
-            console.log("Enlace permanente:", result.url);
-
-            if (navigator.share)
-                await navigator.share({
-                    title: "URL containing web Data",
-                    url,
-                });
-            else {
-                navigator.clipboard.writeText(url);
-                alert("URL copied to clipboard!");
-            }
-        }
-        catch (error) {
-            console.error("Error sharing URL:", error);
-        }
-    });
     const childUpload = dataUpload.firstElementChild;
     dataUpload.addEventListener("click", (event) => {
         if (event.target.localName !== "button")
@@ -189,6 +166,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 class StructureHandler {
     static dropdownIcon = null;
     static #popupInfo = null;
+    static #parserDOM = document.createRange();
     static #structArray = [
         `<button class="addStructBtn"></button>`,
         `<section class="dynStruct">
@@ -205,55 +183,59 @@ class StructureHandler {
             <input type="text" class="div-sub" placeholder = "Subtitle">
          </div>`
     ];
-    static #parserDOM = document.createRange();
 
     static createStruct(event) {
-        /*>---------- [ Initialitation ] ----------<*/
+        const isHost = !document.gistID;
         const { currentTarget, storeData } = event;
+
         const parent = currentTarget.localName === "button"
             ? currentTarget.parentNode
             : currentTarget;
-
         const lvl = 1 + StructureHandler.#structArray.findIndex((struct) =>
             struct.substring(0, 10).includes(parent.localName === "main"
                 ? currentTarget.localName
                 : parent.localName));
-
-        const newDOM = StructureHandler.#parserDOM.createContextualFragment(StructureHandler.#structArray[lvl])
+        const newDOM = StructureHandler.#parserDOM.createContextualFragment(StructureHandler.#structArray[lvl === 0 && document.gistID ? lvl + 1 : lvl])
 
         /*>---------- [ Set Struct ] ----------<*/
         const dynStruct = newDOM.querySelector(".dynStruct");
         if (dynStruct) {
-            if (lvl < StructureHandler.#structArray.length - 1) //Button Insertion
+            if (isHost && lvl < StructureHandler.#structArray.length - 1) //Button Insertion
                 dynStruct.insertAdjacentHTML("beforeend", StructureHandler.#structArray[0]);
 
             dynStruct.id = storeData?.id || Date.now();
-            if (!storeData) 
+            if (!storeData)
                 DataHandler.execData("put", [dynStruct.localName], { id: dynStruct.id, parent: parent.id || null });
 
             for (const input of dynStruct.querySelectorAll(":scope > input")) {
                 const key = input.classList[0].split("-")[1]
-                input.addEventListener("change", async (event) => {
-                    const { parentNode, value } = event.currentTarget
-                    DataHandler.storeInnerData([parentNode.localName, parentNode.id], { [key]: value });
-                });
+                isHost
+                    ? input.addEventListener("change", async (event) => {
+                        const { parentNode, value } = event.currentTarget
+                        DataHandler.storeInnerData([parentNode.localName, parentNode.id], { [key]: value });
+                    })
+                    : input.style.setProperty("pointer-events", "none");
 
                 if (storeData?.[key])
                     input.value = storeData[key];
             }
-            if (storeData?.icon)
-                dynStruct.querySelector(":scope > iconify-icon").setAttribute("icon", storeData.icon)
 
-
-            const fistChild = dynStruct.firstElementChild;
+            const firstChild = dynStruct.firstElementChild;
             switch (dynStruct.localName) {
                 case "section":
-                    fistChild.addEventListener("input", StructureHandler.#changeColor);
-                    fistChild.dispatchEvent(new Event("input"));
+                    firstChild.addEventListener("input", StructureHandler.#changeColor);
+                    firstChild.dispatchEvent(new Event("input"));
+                    if (!isHost)
+                        firstChild.remove();
                     break;
                 case "div":
-                    dynStruct.addEventListener("dblclick", StructureHandler.#openPopup);
-                    fistChild.addEventListener("click", StructureHandler.#dropdownCall);
+                    dynStruct.addEventListener(isHost ? "dblclick" : "click", StructureHandler.#openPopup);
+                    dynStruct.rawMD = storeData?.rawMD || "";
+                    isHost
+                        ? firstChild.addEventListener("click", StructureHandler.#dropdownCall)
+                        :firstChild.style.setProperty("pointer-events", "none");
+                    if (storeData?.icon)
+                        firstChild.setAttribute("icon", storeData.icon);
                     break;
             }
         }
@@ -262,7 +244,7 @@ class StructureHandler {
         newDOM.querySelector(".addStructBtn")?.addEventListener("click", StructureHandler.createStruct);
 
         /*>---------- [ Insert into HTML ] ----------<*/
-        parent.insertBefore(newDOM, parent.lastElementChild);
+        parent[isHost ? "insertBefore" : "appendChild"](newDOM, parent.lastElementChild);
 
         return dynStruct;
     }
@@ -307,11 +289,13 @@ class StructureHandler {
         const textEdit = popup.firstElementChild;
         const textResult = popup.querySelector("section > span");
         textEdit.addEventListener("input", (event) =>
-            textResult.innerHTML = marked.parse(event.currentTarget.value.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, "")));
+            textResult.innerHTML = DataHandler.parseMD(event.currentTarget.value));
         textEdit.addEventListener("change", async (event) => {
             const { client } = StructureHandler.#popupInfo || {};
-            if (client) 
+            if (client) {
                 DataHandler.storeInnerData([client.localName, client.id], { rawMD: event.currentTarget.value });
+                client.rawMD = event.currentTarget.value;
+            }
         });
 
         StructureHandler.#popupInfo = popup.lastElementChild;
@@ -321,16 +305,20 @@ class StructureHandler {
         if (!currentTarget.draggable) {
             const { children, style, parentNode, previousElementSibling } = StructureHandler.#popupInfo;
 
-            StructureHandler.#popupInfo.client = currentTarget;
-            previousElementSibling.value = (await DataHandler.execData("get", [currentTarget.localName], currentTarget.id)).rawMD || "";
-            previousElementSibling.dispatchEvent(new Event("input"));
-
             const getTitleMatch = (attribute, target) =>
                 attribute.innerText = target.querySelector(`.${target.localName}-title`)?.value || "";
 
-            const [entryTitle, sectionTitle] = children;
+            const [entryTitle, sectionTitle, textResult] = children;
             const section = currentTarget.closest("section.dynStruct");
             const colorVar = "--sectionColor";
+
+            if (!previousElementSibling)
+                textResult.innerHTML = DataHandler.parseMD(currentTarget.rawMD);
+            else {
+                StructureHandler.#popupInfo.client = currentTarget;
+                previousElementSibling.value = currentTarget.rawMD || "";
+                previousElementSibling.dispatchEvent(new Event("input"));
+            }
 
             style.setProperty(colorVar, section.style.getPropertyValue(colorVar));
             getTitleMatch(sectionTitle, section);
@@ -472,41 +460,13 @@ class DataHandler {
         });
     }
 
-    static compressData({ id, ...data }) {
-        const compressed = fflate.deflateSync(fflate.strToU8(JSON.stringify(data)));
-        const base64 = btoa(String.fromCharCode(...compressed))
-            .replace(/\+/g, "-")
-            .replace(/\//g, "_")
-            .replace(/=+$/, "");
-        return `${id}=${base64}&`;
-    }
-    //static async InsertURL([storeName], { id, ...data }) {
-    //    const regex = new RegExp(`(${id}=)[^&]*`);
-    //    let node = window.urlSearch.get(id) || "";
-
+    //static compressData({ id, ...data }) {
     //    const compressed = fflate.deflateSync(fflate.strToU8(JSON.stringify(data)));
     //    const base64 = btoa(String.fromCharCode(...compressed))
-    //        .replace(/\+/g, '-')
-    //        .replace(/\//g, '_')
-    //        .replace(/=+$/, '');
-
-    //    if (regex.test(node))
-    //        node = node.replace(regex, `$1${base64}`);
-    //    else
-    //        node += `${id}=${base64}&`;
-
-    //    window.urlSearch.set(storeName, node);
-    //    window.location.hash = window.urlSearch.toString();
-    //}
-    //static async parseURL() {
-    //    const { hash } = window.location;
-    //    input = input.replace(/-/g, '+').replace(/_/g, '/');
-    //    let binario = atob(input).split("").map(c => c.charCodeAt(0));
-    //    return new Uint8Array(binario);
-
-    //    let binario = base64UrlDecode(hash);            
-    //    let descomprimido = fflate.inflateSync(binario);
-    //    return new TextDecoder().decode(descomprimido); 
+    //        .replace(/\+/g, "-")
+    //        .replace(/\//g, "_")
+    //        .replace(/=+$/, "");
+    //    return `${id}=${base64}&`;
     //}
 
     static async storeInnerData([storeName, pathID, objNode], data) {
@@ -571,6 +531,9 @@ class DataHandler {
         ));
     }
 
+    static parseMD(data) {
+        return marked.parse(data.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, ""));
+    }
     static hasSameNodes(target) {
         const targetKeys = Object.keys(target);
         const storeNames = [...DataHandler.#dataBase.objectStoreNames];
