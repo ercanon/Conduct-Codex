@@ -98,24 +98,22 @@ body {
     box-sizing: border-box;
     background-color: var(--sectionColor);
     padding: var(--spaceLyt);
-    padding-top: var(--tightSpaceLyt);
     border-radius: var(--spaceLyt);
     animation: zoom-in .3s ease forwards;
-    font-family: "Noto Sans", "Myriad Pro", Calibri, Helvetica, Arial, sans-serif;
+    font-family: Lora, "Calisto MT", "Bookman Old Style", Bookman, "Goudy Old Style", Garamond, "Hoefler Text", "Bitstream Charter", Georgia, serif;  
     z-index: 2100;
 }
 
 #popupInfo section > h1 {
     color: var(--white);
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: bold;
-    font-family: Lora, "Calisto MT", "Bookman Old Style", Bookman, "Goudy Old Style", Garamond, "Hoefler Text", "Bitstream Charter", Georgia, serif;  
 }
 #popupInfo section > h2 {
     color: var(--white);
     text-align: right;
-    font-size: 1.2rem;
-    font-family: Lora, "Calisto MT", "Bookman Old Style", Bookman, "Goudy Old Style", Garamond, "Hoefler Text", "Bitstream Charter", Georgia, serif;  
+    font-size: 1.2rem;    
+    align-self: end;
 }
 
 #popupInfo section > span {
@@ -129,7 +127,8 @@ body {
     border-radius: var(--spaceLyt);
     overflow-y: auto;
     overflow-x: hidden;
-    font-size: 1rem;
+    font-size: 1.05rem;
+    font-family: "Noto Sans", "Myriad Pro", Calibri, Helvetica, Arial, sans-serif;
 }
     #popupInfo span > h1 { /*TODO*/
         font-size: 1.5rem;

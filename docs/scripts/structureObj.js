@@ -2,10 +2,29 @@
 document.addEventListener("DOMContentLoaded", async () => {
     document.main = document.body.querySelector("main");
     window.urlSearch = new URLSearchParams(window.location.hash.substring(1));
-    document.gistID = window.urlSearch.get("gistID");
+    DataHandler.gistID = window.urlSearch.get("gistID");
 
+    /*>---------- [ Initialize Global Components ] ----------<*/
     StructureHandler.preparePopup(document.getElementById("popupInfo"));
+    document.getElementById("dataDownload").addEventListener("click", async (event) => {
+        if (event.target.localName !== "button")
+            return;
 
+        const jsonContent = !DataHandler.gistID ? JSON.stringify(await DataHandler.exportFile(), null, 2) : sessionStorage.getItem("clientData");
+        if (!jsonContent)
+            return alert("No hay contenido JSON para descargar.");
+
+        const dnld = event.target.firstElementChild;
+        const url = URL.createObjectURL(new Blob([jsonContent], { type: "application/json" }));
+
+        dnld.href = url;
+        dnld.click();
+
+        requestAnimationFrame(() =>
+            URL.revokeObjectURL(url));
+    });
+
+    /*>---------- [ Initialize Client ] ----------<*/
     const elemList = [
         "toggleMode",
         "dataUpload",
@@ -18,17 +37,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         return obj;
     }, {});
 
-    if (document.gistID) {
+    if (DataHandler.gistID) {
         for (const elem of Object.values(elemList))
             elem.remove()
 
-        const response = await fetch(`https://api.github.com/gists/${document.gistID}`);
+        const response = await fetch(`https://api.github.com/gists/${DataHandler.gistID}`);
         const { content } = Object.values((await response.json()).files)[0];
+        sessionStorage.setItem("clientData", content);
         DataHandler.parseData(JSON.parse(content), document.main);
         return;
     }
 
-    /*>---------- [ initialize Components ] ----------<*/
+    /*>---------- [ Initialize Components ] ----------<*/
     window.location.hash = "gistID="
     const {
         toggleMode,
@@ -43,10 +63,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     HoverHandler.prepareHover(deleteStruct);
 
-    /*>---------- [ initialize DataBase ] ----------<*/
+    /*>---------- [ Initialize DataBase ] ----------<*/
     DataHandler.setDataBase(document.main);
 
-    /*>---------- [ Initizalize dropdown ] ----------<*/
+    /*>---------- [ Initialize Dropdown ] ----------<*/
     StructureHandler.dropdownIcon = dropdownIcon;
     const dropdownList = dropdownIcon.lastElementChild;
     fetch("https://cdn.jsdelivr.net/npm/@iconify-json/game-icons/icons.json")
@@ -69,10 +89,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 nameFig.innerText = name;
                 figure.appendChild(nameFig);
 
-                figure.addEventListener("click", async () => {
+                figure.addEventListener("click", () => {
                     const { client } = StructureHandler.dropdownIcon;
                     if (client) {
-                        StructureHandler.dropdownIcon.client.setAttribute("icon", iconName);
+                        client.setAttribute("icon", iconName);
                         DataHandler.storeInnerData([client.parentNode.localName, client.parentNode.id], { icon: iconName });
                     }
                     StructureHandler.dropdownClear();
@@ -91,7 +111,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         .catch((error) =>
             console.error("Error loading icons", error));
 
-    /*>---------- [ initialize Mode Change ] ----------<*/
+    /*>---------- [ Initialize Mode Change ] ----------<*/
     toggleMode.addEventListener("click", (event) => {
         //Determine Mode
         const { currentTarget } = event;
@@ -116,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     dataUpload.addEventListener("click", (event) => {
         if (event.target.localName !== "button")
             return;
-        childUpload.click()
+        childUpload.click();
     });
     childUpload.addEventListener("change", async (event) => {
         const reader = new FileReader();
@@ -144,25 +164,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.error("Error reading file", error);
         };
     });
-    document.getElementById("dataDownload").addEventListener("click", async (event) => {
-        if (event.target.localName !== "button")
-            return;
-
-        const jsonContent = JSON.stringify(await DataHandler.exportFile(), null, 2);
-        if (!jsonContent)
-            return alert("No hay contenido JSON para descargar.");
-
-        const dnld = event.target.firstElementChild;
-        const url = URL.createObjectURL(new Blob([jsonContent], { type: "application/json" }));
-
-        dnld.href = url;
-        dnld.click();
-
-        requestAnimationFrame(() =>
-            URL.revokeObjectURL(url));
-    });
 });
 
+/*>--------------- { Structure Logic } ---------------<*/
 class StructureHandler {
     static dropdownIcon = null;
     static #popupInfo = null;
@@ -171,21 +175,21 @@ class StructureHandler {
         `<button class="addStructBtn"></button>`,
         `<section class="dynStruct">
             <input type="color" class="section-color">
-            <input type="text" class="section-title" placeholder = "Title">
-            <input type="text" class="section-usage" placeholder = "Usage" >
+            <input type="text" class="section-title" placeholder="Title">
+            <input type="text" class="section-usage" placeholder="Usage">
          </section>`,
         `<article class="dynStruct">
-            <input type="text" class="article-type" placeholder = "Entry Type">
+            <input type="text" class="article-type" placeholder="Entry Type">
          </article>`,
         `<div class="dynStruct">
             <iconify-icon icon="material-symbols:add-2-rounded" width="unset" height="unset" noobserver></iconify-icon>
-            <input type="text" class="div-title" placeholder = "Title">
-            <input type="text" class="div-sub" placeholder = "Subtitle">
+            <input type="text" class="div-title" placeholder="Title">
+            <input type="text" class="div-sub" placeholder="Subtitle">
          </div>`
     ];
 
     static createStruct(event) {
-        const isHost = !document.gistID;
+        const isHost = !DataHandler.gistID;
         const { currentTarget, storeData } = event;
 
         const parent = currentTarget.localName === "button"
@@ -195,7 +199,7 @@ class StructureHandler {
             struct.substring(0, 10).includes(parent.localName === "main"
                 ? currentTarget.localName
                 : parent.localName));
-        const newDOM = StructureHandler.#parserDOM.createContextualFragment(StructureHandler.#structArray[lvl === 0 && document.gistID ? lvl + 1 : lvl])
+        const newDOM = StructureHandler.#parserDOM.createContextualFragment(StructureHandler.#structArray[lvl === 0 && !isHost ? lvl + 1 : lvl])
 
         /*>---------- [ Set Struct ] ----------<*/
         const dynStruct = newDOM.querySelector(".dynStruct");
@@ -205,16 +209,21 @@ class StructureHandler {
 
             dynStruct.id = storeData?.id || Date.now();
             if (!storeData)
-                DataHandler.execData("put", [dynStruct.localName], { id: dynStruct.id, parent: parent.id || null });
+                DataHandler.execData("put", [dynStruct.localName], { id: dynStruct.id, parent: parent.id || parent.localName });
 
             for (const input of dynStruct.querySelectorAll(":scope > input")) {
                 const key = input.classList[0].split("-")[1]
-                isHost
-                    ? input.addEventListener("change", async (event) => {
+                if (!isHost) {
+                    input.placeholder = "";
+                    dynStruct.localName === "section"
+                        ? input.disabled = true
+                        : input.style.setProperty("pointer-events", "none");
+                }
+                else
+                    input.addEventListener("change", async (event) => {
                         const { parentNode, value } = event.currentTarget
                         DataHandler.storeInnerData([parentNode.localName, parentNode.id], { [key]: value });
                     })
-                    : input.style.setProperty("pointer-events", "none");
 
                 if (storeData?.[key])
                     input.value = storeData[key];
@@ -233,7 +242,7 @@ class StructureHandler {
                     dynStruct.rawMD = storeData?.rawMD || "";
                     isHost
                         ? firstChild.addEventListener("click", StructureHandler.#dropdownCall)
-                        :firstChild.style.setProperty("pointer-events", "none");
+                        : firstChild.style.setProperty("pointer-events", "none");
                     if (storeData?.icon)
                         firstChild.setAttribute("icon", storeData.icon);
                     break;
@@ -253,31 +262,52 @@ class StructureHandler {
             DataHandler.execData("delete", [localName], id);
         target.remove();
     }
-    static replaceStruct(target, position) {
-        position.replaceWith(target)
-        DataHandler.storeInnerData([target.localName, target.id], { parent: target.parentNode.id || null })
+    static async replaceStruct(target, position) {
+        position.replaceWith(target);
+
+        const { localName, id, parentNode } = target;
+
+        const dataMap = new Map((await DataHandler.execData("getAll", [localName, "ParentID"])).map((data) => [data.id, data]));
+        if (!dataMap.has(id))
+            dataMap.set(id, await DataHandler.execData("get", [localName], id));
+
+        const childrenList = [...parentNode.querySelectorAll(":scope > .dynStruct")];
+        const sortedIds = childrenList
+            .map((child) =>
+                child.id)
+            .sort((a, b) =>
+                Number(a) - Number(b));
+
+        sortedIds.forEach((newId, i) => {
+            const data = dataMap.get(childrenList[i].id);
+            data.id = childrenList[i].id = newId;
+            DataHandler.execData("put", [localName], data);
+        });
     }
 
+    /*>--------------- { Color Input Logic } ---------------<*/
     static #changeColor(event) {
         event.currentTarget.parentNode.style.setProperty("--sectionColor", event.currentTarget.value);
     }
 
+    /*>--------------- { Icon Dropdown Logic } ---------------<*/
     static #dropdownCall(event) {
-        const rect = event.currentTarget.getBoundingClientRect();
+        const { currentTarget } = event;
+        const rect = currentTarget.getBoundingClientRect();
         StructureHandler.dropdownIcon.style.transform = `translateY(${rect.bottom}px)`;
 
-        const active = StructureHandler.dropdownIcon.client === event.currentTarget
+        const active = StructureHandler.dropdownIcon.client === currentTarget;
         StructureHandler.dropdownIcon.hidden = active;
-        if (active)
-            StructureHandler.dropdownIcon.client = null;
-        else
-            StructureHandler.dropdownIcon.client = event.currentTarget;
+        StructureHandler.dropdownIcon.client = active
+            ? null
+            : currentTarget;
     }
     static dropdownClear() {
         StructureHandler.dropdownIcon.client = null;
         StructureHandler.dropdownIcon.hidden = true;
     }
 
+    /*>--------------- { Popup Logic } ---------------<*/
     static preparePopup(popup) {
         popup.addEventListener("click", (event) => {
             if (event.target === popup) {
@@ -356,11 +386,12 @@ class HoverHandler {
 
     static #hoverStruct(event) {
         event.stopPropagation();
-        if (HoverHandler.#selectedStruct || !event.target.draggable)
+        const { target } = event;
+        if (HoverHandler.#selectedStruct || !target.draggable)
             return;
 
-        const rect = event.target.getBoundingClientRect();
-        const styleValues = event.target === HoverHandler.#selectedStruct
+        const rect = target.getBoundingClientRect();
+        const styleValues = target === HoverHandler.#selectedStruct
             ? { width: "0", height: "0", transition: "none" }
             : { width: `${rect.width}px`, height: `${rect.height}px`, transition: "" };
 
@@ -410,11 +441,12 @@ class HoverHandler {
                 isLeftOrTop ? target : target.nextSibling
             );
         }
-        else if (parentName === target.localName)
+        else if (parentName === target.localName) {
             target.insertBefore(
                 HoverHandler.#indStruct,
                 target.lastElementChild
             );
+        }
     }
     static #dragDrop(event) {
         event.preventDefault();
@@ -436,6 +468,7 @@ class HoverHandler {
 class DataHandler {
     static #dataBase = null;
     static #dbOrder = { section: 1, article: 2, div: 3 };
+    static gistID = null;
 
     static async setDataBase() {
         await new Promise((resolve, reject) => {
@@ -447,7 +480,7 @@ class DataHandler {
                     if (!dataBase.objectStoreNames.contains(storeName))
                         dataBase.createObjectStore(storeName, { keyPath: "id" })
                             .createIndex("ParentID", "parent", { unique: false });
-                };
+                }
             };
 
             request.onsuccess = async (event) => {
@@ -475,9 +508,9 @@ class DataHandler {
 
         const request = await DataHandler.execData("get", [storeName], pathID);
         const storedData = request?.[objNode] || request;
-        if (Array.isArray(storedData) && (Array.isArray(data) || typeof data !== "object"))
-            data = [...storedData, ...data];
-        else if (typeof storedData === "object" && !Array.isArray(storedData) && !Array.isArray(data))
+        if (Array.isArray(storedData))
+            data = [...storedData, ...(Array.isArray(data) ? data : [data])];
+        else if (typeof storedData === "object" && !Array.isArray(storedData))
             data = { ...storedData, ...data };
         else
             throw new Error("New data do not match previous data.");
@@ -510,9 +543,9 @@ class DataHandler {
             .sort(([keyA], [keyB]) =>
                 (DataHandler.#dbOrder[keyA] || 99) - (DataHandler.#dbOrder[keyB] || 99));
 
-        target = { null: target };
+        target = { main: target };
         for (const [storeName, data] of orderedKeys) {
-            const structList = {};           
+            const structList = {};   
             for (const storeData of data) {
                 const currentTarget = target[storeData.parent];
                 if (currentTarget) {

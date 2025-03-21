@@ -83,7 +83,7 @@ div.dynStruct {
     column-gap: var(--tightSpaceLyt);
     transition: box-shadow 0.3s ease;
 }
-    div.dynStruct:hover {
+    div.dynStruct[draggable="false"]:hover {
         box-shadow: var(--sectionColor) -2px 2px 3px 0px;
     }
 
@@ -107,7 +107,7 @@ div.dynStruct > .div-title {
 }
 
 div.dynStruct > .div-sub {
-    font-size: 1.03rem;
+    font-size: 1.05rem;
     font-style: italic;
 }
 
