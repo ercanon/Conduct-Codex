@@ -36,9 +36,9 @@ class StructureHandler {
             if (isHost && lvl < StructureHandler.#structArray.length - 1) //Button Insertion
                 dynStruct.insertAdjacentHTML("beforeend", StructureHandler.#structArray[0]);
 
-            dynStruct.id = storeData?.id || Date.now();
+            dynStruct.id = storeData?.id || DataHandler.randomUUIDv4();
             if (!storeData)
-                DataHandler.execData("put", [dynStruct.localName], { id: dynStruct.id, parent: parent.id || parent.localName });
+                DataHandler.execData("put", [dynStruct.localName], { id: dynStruct.id, order: Date.now(), parent: parent.id });
 
             for (const input of dynStruct.querySelectorAll(":scope > input")) {
                 const key = input.classList[0].split("-")[1]
@@ -102,23 +102,12 @@ class StructureHandler {
     static async replaceStruct(target, position) {
         position.replaceWith(target);
 
-        const { localName, id, parentNode } = target;
-
-        const dataMap = new Map((await DataHandler.execData("getAll", [localName, "ParentID"])).map((data) => [data.id, data]));
-        if (!dataMap.has(id))
-            dataMap.set(id, await DataHandler.execData("get", [localName], id));
-
-        const childrenList = [...parentNode.querySelectorAll(":scope > .dynStruct")];
-        const sortedIds = childrenList
-            .map((child) =>
-                child.id)
-            .sort((a, b) =>
-                Number(a) - Number(b));
-
-        sortedIds.forEach((newId, i) => {
-            const data = dataMap.get(childrenList[i].id);
-            data.id = childrenList[i].id = newId;
-            DataHandler.execData("put", [localName], data);
+        const { localName, parentNode } = target;
+        [...parentNode.querySelectorAll(":scope > .dynStruct")].forEach((struct, i) => {
+            DataHandler.storeInnerData([localName, struct.id], {
+                order: Date.now() + i,
+                parent: parentNode.id
+            });
         });
     }
 
@@ -191,30 +180,40 @@ class HoverHandler {
         event.preventDefault();
         event.stopPropagation();
 
-        const { target } = event;
+        const { target, clientY } = event;
         if (target.id === "deleteStruct")
             return target.appendChild(HoverHandler.#indStruct);
-        else if (!target.draggable)
+
+        if (!target.draggable)
             return;
 
         const { selectedName, parentName } = HoverHandler.#selectedStruct;
-        const rectTarget = target.getBoundingClientRect();
-        const isLeftOrTop = selectedName === "div"
-            ? event.clientX < rectTarget.left + rectTarget.width / 2
-            : event.clientY < rectTarget.top + rectTarget.height / 2;
+        const { nextElementSibling, previousElementSibling } = HoverHandler.#indStruct;
+        const structTarget = target.closest(selectedName);
+        if (structTarget) {
+            const { top, height } = structTarget.getBoundingClientRect();
+            const condition = selectedName === "div"
+                ? nextElementSibling.id === structTarget.id
+                : clientY > top + (height / 2);
 
-        if (selectedName === target.localName) {
-            target.parentNode.insertBefore(
+            return structTarget.parentNode.insertBefore(
                 HoverHandler.#indStruct,
-                isLeftOrTop ? target : target.nextSibling
+                condition ? structTarget.nextElementSibling : structTarget
             );
         }
-        else if (parentName === target.localName) {
-            target.insertBefore(
+
+        const { top, bottom } = nextElementSibling?.getBoundingClientRect();
+        if (clientY < bottom && clientY > Math.min(
+            previousElementSibling?.getBoundingClientRect().top,
+            HoverHandler.#indStruct.getBoundingClientRect().top,
+            top))
+            return;
+
+        if (parentName === target.localName) 
+            return target.insertBefore(
                 HoverHandler.#indStruct,
                 target.lastElementChild
             );
-        }
     }
     static #dragDrop(event) {
         event.preventDefault();

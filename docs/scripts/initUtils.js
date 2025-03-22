@@ -64,6 +64,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     HoverHandler.prepareHover(deleteStruct);
     DataHandler.setDataBase(document.main);
+    document.main.addEventListener("scroll", () => {
+        DropdownHandler.dropdownClear();
+        HoverHandler.resetIndicate(false);
+    });
 
     /*>---------- [ Initialize Mode Change ] ----------<*/
     toggleMode.addEventListener("click", (event) => {
@@ -159,10 +163,6 @@ class DropdownHandler {
                 });
 
                 dropdown.addEventListener("mouseleave", DropdownHandler.dropdownClear);
-                document.main.addEventListener("scroll", () => {
-                    if (!dropdown.hidden)
-                        DropdownHandler.dropdownClear()
-                });
                 dropdown.firstElementChild.addEventListener("input", (event) => {
                     const textInput = event.currentTarget.value.toLowerCase();
                     [...dropdownList.children].forEach(async (icon) =>
@@ -193,7 +193,6 @@ class DropdownHandler {
         DropdownHandler.#dropdownIcon.hidden = true;
     }
 }
-
 class PopupHandler {
     static #popupInfo = null;
 
@@ -259,7 +258,7 @@ class DataHandler {
 
             request.onupgradeneeded = (event) => {
                 const dataBase = event.target.result;
-                for (const storeName of Object.keys(DataHandler.#dbOrder)) { 
+                for (const storeName of Object.keys(DataHandler.#dbOrder)) {
                     if (!dataBase.objectStoreNames.contains(storeName))
                         dataBase.createObjectStore(storeName, { keyPath: "id" })
                             .createIndex("ParentID", "parent", { unique: false });
@@ -275,15 +274,6 @@ class DataHandler {
                 reject(event.target.error);
         });
     }
-
-    //static compressData({ id, ...data }) {
-    //    const compressed = fflate.deflateSync(fflate.strToU8(JSON.stringify(data)));
-    //    const base64 = btoa(String.fromCharCode(...compressed))
-    //        .replace(/\+/g, "-")
-    //        .replace(/\//g, "_")
-    //        .replace(/=+$/, "");
-    //    return `${id}=${base64}&`;
-    //}
 
     static async storeInnerData([storeName, pathID, objNode], data) {
         if (!data)
@@ -327,9 +317,10 @@ class DataHandler {
                 (DataHandler.#dbOrder[keyA] || 99) - (DataHandler.#dbOrder[keyB] || 99));
 
         target = { main: target };
-        for (const [storeName, data] of orderedKeys) {
-            const structList = {};   
-            for (const storeData of data) {
+        for (const [storeName, data] of orderedKeys) {           
+            const structList = {};
+            for (const storeData of data.sort((a, b) =>
+                Number(a.order) - Number(b.order))) {
                 const currentTarget = target[storeData.parent];
                 if (currentTarget) {
                     structList[storeData.id] = StructureHandler.createStruct({ currentTarget, storeData });
@@ -346,6 +337,14 @@ class DataHandler {
                 ({ [storeName]: await DataHandler.execData("getAll", [storeName]) }))
         ));
     }
+    //static compressData({ id, ...data }) {
+    //    const compressed = fflate.deflateSync(fflate.strToU8(JSON.stringify(data)));
+    //    const base64 = btoa(String.fromCharCode(...compressed))
+    //        .replace(/\+/g, "-")
+    //        .replace(/\//g, "_")
+    //        .replace(/=+$/, "");
+    //    return `${id}=${base64}&`;
+    //}
 
     static parseMD(data) {
         return marked.parse(data.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, ""));
@@ -356,5 +355,16 @@ class DataHandler {
 
         return targetKeys.length <= storeNames.length && targetKeys.every((key) =>
             storeNames.includes(key));
+    }
+    static randomUUIDv4() {
+        const array = new Uint8Array(16);
+        crypto.getRandomValues(array);
+
+        array[6] = (array[6] & 0x0f) | 0x40;
+        array[8] = (array[8] & 0x3f) | 0x80;
+
+        return [...array].map((byte, i) =>
+            [4, 6, 8, 10].includes(i) ? `-${byte.toString(16).padStart(2, '0')}` : byte.toString(16).padStart(2, '0')
+        ).join('');
     }
 }
