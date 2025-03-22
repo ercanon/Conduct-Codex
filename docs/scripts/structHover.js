@@ -36,9 +36,9 @@ class StructureHandler {
             if (isHost && lvl < StructureHandler.#structArray.length - 1) //Button Insertion
                 dynStruct.insertAdjacentHTML("beforeend", StructureHandler.#structArray[0]);
 
-            dynStruct.id = storeData?.id || Date.now();
+            dynStruct.id = storeData?.id || DataHandler.randomUUIDv4();
             if (!storeData)
-                DataHandler.execData("put", [dynStruct.localName], { id: dynStruct.id, parent: parent.id || parent.localName });
+                DataHandler.execData("put", [dynStruct.localName], { id: dynStruct.id, order: Date.now(), parent: parent.id || parent.localName });
 
             for (const input of dynStruct.querySelectorAll(":scope > input")) {
                 const key = input.classList[0].split("-")[1]
@@ -103,23 +103,19 @@ class StructureHandler {
         position.replaceWith(target);
 
         const { localName, id, parentNode } = target;
-
-        const dataMap = new Map((await DataHandler.execData("getAll", [localName, "ParentID"])).map((data) => [data.id, data]));
-        if (!dataMap.has(id))
-            dataMap.set(id, await DataHandler.execData("get", [localName], id));
-
         const childrenList = [...parentNode.querySelectorAll(":scope > .dynStruct")];
-        const sortedIds = childrenList
-            .map((child) =>
-                child.id)
-            .sort((a, b) =>
-                Number(a) - Number(b));
 
-        sortedIds.forEach((newId, i) => {
-            const data = dataMap.get(childrenList[i].id);
-            data.id = childrenList[i].id = newId;
-            DataHandler.execData("put", [localName], data);
-        });
+        const dataList = Object.fromEntries((await DataHandler.execData("getAll", [localName, "ParentID"])).map((data) => [data.id, data]));
+        dataList[id] = await DataHandler.execData("get", [localName], id);
+
+        Object.values(dataList)
+            .sort((a, b) =>
+                Number(a.order) - Number(b.order))
+            .forEach((newOrder, i) => {
+                const data = dataList[childrenList[i].id];
+                data.order = newOrder;
+                DataHandler.execData("put", [localName], data);
+            });
     }
 
     static #changeColor(event) {
@@ -191,30 +187,41 @@ class HoverHandler {
         event.preventDefault();
         event.stopPropagation();
 
-        const { target } = event;
+        const { target, clientX, clientY } = event;
         if (target.id === "deleteStruct")
             return target.appendChild(HoverHandler.#indStruct);
-        else if (!target.draggable)
+
+        if (!target.draggable)
             return;
 
         const { selectedName, parentName } = HoverHandler.#selectedStruct;
-        const rectTarget = target.getBoundingClientRect();
-        const isLeftOrTop = selectedName === "div"
-            ? event.clientX < rectTarget.left + rectTarget.width / 2
-            : event.clientY < rectTarget.top + rectTarget.height / 2;
+        const structTarget = target.closest(selectedName);
+        if (structTarget) {
+            const { left, top, width, height } = structTarget.getBoundingClientRect();
+            const isLeftOrTop = selectedName === "div"
+                ? clientX < left + (width / 2)
+                : clientY < top + (height / 2);
 
-        if (selectedName === target.localName) {
-            target.parentNode.insertBefore(
+            return structTarget.parentNode.insertBefore(
                 HoverHandler.#indStruct,
-                isLeftOrTop ? target : target.nextSibling
+                isLeftOrTop ? structTarget : structTarget.nextSibling
             );
         }
-        else if (parentName === target.localName) {
-            target.insertBefore(
+
+        const rectHover = HoverHandler.#indStruct.getBoundingClientRect();
+        let rectSibling = HoverHandler.#indStruct.nextElementSibling.getBoundingClientRect();
+        if (rectSibling.top > rectHover.bottom)
+            rectSibling = HoverHandler.#indStruct.previousElementSibling.getBoundingClientRect();
+
+        if (clientX > rectHover.left && clientX < Math.max(rectHover.right, rectSibling.right) &&
+            clientY > Math.min(rectHover.top, rectSibling.top) && clientY < rectSibling.bottom)
+            return;
+
+        if (parentName === target.localName) 
+            return target.insertBefore(
                 HoverHandler.#indStruct,
                 target.lastElementChild
             );
-        }
     }
     static #dragDrop(event) {
         event.preventDefault();

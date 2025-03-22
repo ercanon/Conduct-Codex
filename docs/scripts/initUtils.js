@@ -259,9 +259,9 @@ class DataHandler {
 
             request.onupgradeneeded = (event) => {
                 const dataBase = event.target.result;
-                for (const storeName of Object.keys(DataHandler.#dbOrder)) { 
+                for (const storeName of Object.keys(DataHandler.#dbOrder)) {
                     if (!dataBase.objectStoreNames.contains(storeName))
-                        dataBase.createObjectStore(storeName, { keyPath: "id" })
+                        dataBase.createObjectStore(storeName, { keyPath: "order" })
                             .createIndex("ParentID", "parent", { unique: false });
                 }
             };
@@ -328,7 +328,7 @@ class DataHandler {
 
         target = { main: target };
         for (const [storeName, data] of orderedKeys) {
-            const structList = {};   
+            const structList = {};
             for (const storeData of data) {
                 const currentTarget = target[storeData.parent];
                 if (currentTarget) {
@@ -356,5 +356,16 @@ class DataHandler {
 
         return targetKeys.length <= storeNames.length && targetKeys.every((key) =>
             storeNames.includes(key));
+    }
+    static randomUUIDv4() {
+        const array = new Uint8Array(16);
+        crypto.getRandomValues(array);
+
+        array[6] = (array[6] & 0x0f) | 0x40;
+        array[8] = (array[8] & 0x3f) | 0x80;
+
+        return [...array].map((byte, i) =>
+            [4, 6, 8, 10].includes(i) ? `-${byte.toString(16).padStart(2, '0')}` : byte.toString(16).padStart(2, '0')
+        ).join('');
     }
 }
