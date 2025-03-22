@@ -47,4 +47,4 @@ Click on an entry to open its information popup.
 - [Marked](https://marked.js.org)
 
 ## Examples
-- [5eRules2014](ercanon.github.io/Conduct-Codex/#gistID=20d64ce7b0c1c624ee82688dbd9114c0)
+- [5eRules2014](https://ercanon.github.io/Conduct-Codex/#gistID=20d64ce7b0c1c624ee82688dbd9114c0)
