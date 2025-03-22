@@ -3,7 +3,7 @@
     position: relative;
     display: grid;
     align-items: center;
-    grid-template-rows: min-content;
+    grid-template-rows: max-content;
     width: 100%;
     box-sizing: border-box;
 }
@@ -21,7 +21,7 @@ section.dynStruct {
     background-color: var(--sectionColor);
     padding: var(--spaceLyt);
     border-radius: var(--spaceLyt);
-    grid-template-columns: min-content 1fr min-content;
+    grid-template-columns: max-content 1fr max-content;
     gap: var(--tightSpaceLyt);
     font-family: Lora, "Calisto MT", "Bookman Old Style", Bookman, "Goudy Old Style", Garamond, "Hoefler Text", "Bitstream Charter", Georgia, serif;
     z-index: 100;
@@ -32,7 +32,7 @@ section.dynStruct >.section-color {
     cursor: pointer;
 }
     section.dynStruct > .section-color::-webkit-color-swatch-wrapper {
-        border: 2px solid var(--whiteHvr);
+        border: 2px solid var(--greyHvr);
         padding: 0;
         border-radius: 5px;
     }
@@ -51,6 +51,7 @@ section.dynStruct > .section-usage {
     font-size: 1.05rem;
     font-weight: bold;
     align-self: end;
+    field-sizing: content;
 }
 
 section.dynStruct > .addStructBtn {
@@ -79,7 +80,7 @@ article.dynStruct > .article-type {
 
 
 div.dynStruct {
-    grid-template-columns: min-content 1fr;
+    grid-template-columns: max-content 1fr;
     column-gap: var(--tightSpaceLyt);
     transition: box-shadow 0.3s ease;
 }
@@ -96,6 +97,7 @@ div.dynStruct > iconify-icon {
     height: 100%;
     color: var(--white);
     background-color: var(--sectionColor);
+    transition: background-color .3s ease;
 }
     div.dynStruct > iconify-icon:hover {
         color: var(--whiteHvr);

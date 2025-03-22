@@ -198,7 +198,7 @@ class PopupHandler {
     static #popupInfo = null;
 
     static preparePopup(popup) {
-        popup.addEventListener("click", (event) => {
+        popup.addEventListener("mousedown", (event) => {
             if (event.target === popup) {
                 popup.hidden = true;
                 PopupHandler.#popupInfo.client = null;

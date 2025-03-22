@@ -6,9 +6,9 @@
     /* Palette */
     --black: rgb(50, 50, 50);
     --white: rgb(245, 245, 245);
-    --whiteHvr: rgb(200, 200, 200);
-    --grey: rgb(91, 91, 91);
-    --greyHvr: rgb(130, 130, 130);
+    --whiteHvr: rgb(190, 190, 190);
+    --grey: rgb(115, 115, 115);
+    --greyHvr: rgb(215, 215, 215);
     --red: rgb(211, 47, 47);
     --redHvr: rgb(169, 25, 25);
     --blue: rgb(0, 150, 220);
@@ -91,8 +91,8 @@ body {
     position: relative;
     display: grid;
     align-items: center;
-    grid-template-rows: min-content;
-    grid-template-columns: 1fr min-content;
+    grid-template-rows: max-content;
+    grid-template-columns: 1fr max-content;
     gap: var(--tightSpaceLyt);
     width: 100%;
     box-sizing: border-box;
@@ -130,31 +130,40 @@ body {
     font-size: 1.05rem;
     font-family: "Noto Sans", "Myriad Pro", Calibri, Helvetica, Arial, sans-serif;
 }
-    #popupInfo span > h1 { /*TODO*/
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
+    #popupInfo span > * {
+        margin-bottom: .5rem;
     }
-    #popupInfo span > h2 { /*TODO*/
-        font-size: 1.25rem;
-        margin-bottom: .75rem;
+    #popupInfo span > *:last-child {
+        margin-bottom: 0;
     }
-    #popupInfo span > p { /*TODO*/
-        margin: .5rem 0;
+    #popupInfo span h1 {
+        font-size: 1.8rem;
     }
-    #popupInfo span > code { /*TODO*/
-        background-color: #eee;
-        padding: .12rem .25rem;
-        border-radius: .78rem;
+    #popupInfo span blockquote {
+        background-color: var(--greyHvr);
+        padding-left: .5rem;
+        border: 1px solid var(--grey);
+        border-left: var(--spaceLyt) solid var(--grey);
+        border-radius: var(--tightSpaceLyt);
+        margin: .2rem;
     }
-    #popupInfo span > pre { /*TODO*/
-        background-color: #eee;
-        padding: .62rem;
-        border-radius: 5px;
-        overflow-x: auto;
+    #popupInfo span > blockquote {
+        margin-bottom: .5rem;
     }
-    #popupInfo span > a { /*TODO*/
-        color: var(--blue);
-        text-decoration: underline;
+    #popupInfo span ol,
+    #popupInfo span ul {
+        margin-left: 1.2rem;
+    }
+    #popupInfo span code {
+        background-color: var(--greyHvr);
+        padding: var(--tightSpaceLyt);
+        border-radius: var(--tightSpaceLyt);
+    }
+    #popupInfo span > table {
+        border-spacing: 1rem 0;
+    }
+    #popupInfo span > hr {
+        margin-block: .7rem;
     }
 
 /*>--------------- { Dropdown } ---------------<*/
@@ -191,7 +200,7 @@ body {
         word-wrap: break-word;
         overflow-y: auto;
         overflow-x: hidden;
-        max-height: 25vh;
+        height: 25vh;
     }
 
         #dropdownIcon > span figure:hover {
@@ -238,7 +247,7 @@ body {
     }
     #deleteStruct:has(>.dragStruct) {
         background-color: var(--redHvr);
-        width: 30vh;
+        width: 30vw;
         height: 7vh;
     }
 @media (max-width: 700px) {
@@ -247,7 +256,7 @@ body {
         height: 7vh;
     }
         #deleteStruct:has(>.dragStruct) {
-            width: 35vh;
+            width: 35vw;
             height: 10vh;
         }
 }

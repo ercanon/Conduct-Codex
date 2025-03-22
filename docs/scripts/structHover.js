@@ -28,7 +28,7 @@ class StructureHandler {
             struct.substring(0, 10).includes(parent.localName === "main"
                 ? currentTarget.localName
                 : parent.localName));
-        const newDOM = StructureHandler.#parserDOM.createContextualFragment(StructureHandler.#structArray[lvl === 0 && !isHost ? lvl + 1 : lvl])
+        const newDOM = StructureHandler.#parserDOM.createContextualFragment(StructureHandler.#structArray[lvl <= 0 && !isHost ? lvl + 1 : lvl])
 
         /*>---------- [ Set Struct ] ----------<*/
         const dynStruct = newDOM.querySelector(".dynStruct");
@@ -65,6 +65,14 @@ class StructureHandler {
                     firstChild.dispatchEvent(new Event("input"));
                     if (!isHost)
                         firstChild.remove();
+                    break;
+                case "article":
+                    if (!isHost) {
+                        const newText = document.createElement("p");
+                        newText.className = firstChild.className;
+                        newText.textContent = firstChild.value;
+                        firstChild.replaceWith(newText);
+                    }
                     break;
                 case "div":
                     dynStruct.addEventListener(isHost ? "dblclick" : "click", PopupHandler.openPopup);
@@ -190,12 +198,12 @@ class HoverHandler {
             return;
 
         const { selectedName, parentName } = HoverHandler.#selectedStruct;
-        if (selectedName === target.localName) {
-            const rect = target.getBoundingClientRect();
-            const isLeftOrTop = selectedName === "div"
-                ? event.clientX < rect.left + rect.width / 2
-                : event.clientY < rect.top + rect.height / 2;
+        const rectTarget = target.getBoundingClientRect();
+        const isLeftOrTop = selectedName === "div"
+            ? event.clientX < rectTarget.left + rectTarget.width / 2
+            : event.clientY < rectTarget.top + rectTarget.height / 2;
 
+        if (selectedName === target.localName) {
             target.parentNode.insertBefore(
                 HoverHandler.#indStruct,
                 isLeftOrTop ? target : target.nextSibling
