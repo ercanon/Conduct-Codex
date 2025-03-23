@@ -87,22 +87,24 @@ body {
     z-index: 2200;
 }
 
-#popupInfo > section {
-    position: relative;
-    display: grid;
-    align-items: center;
-    grid-template-rows: max-content;
-    grid-template-columns: 1fr max-content;
-    gap: var(--tightSpaceLyt);
-    width: 100%;
-    box-sizing: border-box;
-    background-color: var(--sectionColor);
-    padding: var(--spaceLyt);
-    border-radius: var(--spaceLyt);
-    animation: zoom-in .3s ease forwards;
-    font-family: Lora, "Calisto MT", "Bookman Old Style", Bookman, "Goudy Old Style", Garamond, "Hoefler Text", "Bitstream Charter", Georgia, serif;  
-    z-index: 2100;
-}
+    #popupInfo > section {
+        position: relative;
+        display: grid;
+        align-items: center;
+        grid-template-rows: max-content 1fr;
+        grid-template-columns: 1fr max-content;
+        gap: var(--tightSpaceLyt);
+        width: 100%;
+        max-height: 100%;
+        box-sizing: border-box;
+        background-color: var(--sectionColor);
+        padding: var(--spaceLyt);
+        border-radius: var(--spaceLyt);
+        animation: zoom-in .3s ease forwards;
+        font-family: Lora, "Calisto MT", "Bookman Old Style", Bookman, "Goudy Old Style", Garamond, "Hoefler Text", "Bitstream Charter", Georgia, serif;
+        overflow: hidden;
+        z-index: 2100;
+    }
 
 #popupInfo section > h1 {
     color: var(--white);
@@ -119,6 +121,7 @@ body {
 #popupInfo section > span {
     grid-column: 1/-1;
     width: 100%;
+    height: 100%;
     padding: var(--spaceLyt);
     box-sizing: border-box;
     word-wrap: break-word;
@@ -193,6 +196,7 @@ body {
         display: grid;
         text-align: center;
         grid-template-columns: repeat(auto-fill, minmax(3.45rem, 1fr));
+        grid-auto-rows: max-content;
         gap: var(--spaceLyt);
         padding: var(--spaceLyt);
         font-size: .85rem;
@@ -266,6 +270,7 @@ header {
     display: flex;
     padding: var(--tightSpaceLyt) var(--spaceLyt);
     justify-content: space-between;
+    gap: var(--tightSpaceLyt);
     background-color: var(--black);
     z-index: 1000;
 }
@@ -280,7 +285,6 @@ header > h1 {
 header > button {
     aspect-ratio: 1/1;
     background-color: var(--white);
-    height: 85%;
     align-self: center;
     transition: background-color .3s ease;
     -webkit-mask-image: var(--mask-url);
@@ -297,6 +301,7 @@ header > button {
     }
 #toggleMode {
     aspect-ratio: unset;
+    height: 85%;
     margin-inline: var(--tightSpaceLyt);
     padding-inline: var(--spaceLyt);
     font-size: .9rem;
@@ -315,11 +320,13 @@ header > button {
     }
 
 #dataUpload {
-    --mask-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M11 14.825V18q0 .425.288.713T12 19t.713-.288T13 18v-3.175l.9.9q.15.15.338.225t.375.063t.362-.088t.325-.225q.275-.3.288-.7t-.288-.7l-2.6-2.6q-.15-.15-.325-.212T12 11.425t-.375.063t-.325.212l-2.6 2.6q-.3.3-.287.7t.312.7q.3.275.7.288t.7-.288zM6 22q-.825 0-1.412-.587T4 20V4q0-.825.588-1.412T6 2h7.175q.4 0 .763.15t.637.425l4.85 4.85q.275.275.425.638t.15.762V20q0 .825-.587 1.413T18 22zm7-14q0 .425.288.713T14 9h4l-5-5z'/%3E%3C/svg%3E");
+    height: 100%;
+    --mask-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h5.175q.4 0 .763.15t.637.425L12 6h8q.825 0 1.413.588T22 8v10q0 .825-.587 1.413T20 20zm8-3q.425 0 .713-.288T13 16v-3.2l.9.9q.275.275.7.275t.7-.275t.275-.7t-.275-.7l-2.6-2.6q-.3-.3-.7-.3t-.7.3l-2.6 2.6q-.275.275-.275.7t.275.7t.7.275t.7-.275l.9-.9V16q0 .425.288.713T12 17'/%3E%3C/svg%3E");
 }
 
 #dataDownload {
-    --mask-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M13 13.15V10q0-.425-.288-.712T12 9t-.712.288T11 10v3.15l-.9-.875Q9.825 12 9.413 12t-.713.3q-.275.275-.275.7t.275.7l2.6 2.6q.3.3.7.3t.7-.3l2.6-2.6q.275-.275.287-.687T15.3 12.3q-.275-.275-.687-.288t-.713.263zM6 22q-.825 0-1.412-.587T4 20V8.825q0-.4.15-.762t.425-.638l4.85-4.85q.275-.275.638-.425t.762-.15H18q.825 0 1.413.588T20 4v16q0 .825-.587 1.413T18 22z'/%3E%3C/svg%3E");
+    height: 95%;
+    --mask-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M15 9H5V5h10m-3 14a3 3 0 0 1-3-3a3 3 0 0 1 3-3a3 3 0 0 1 3 3a3 3 0 0 1-3 3m5-16H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7z'/%3E%3C/svg%3E");
 }
 
 /*>--------------- { Main } ---------------<*/

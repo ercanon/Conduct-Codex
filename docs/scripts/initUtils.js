@@ -66,14 +66,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     DataHandler.setDataBase(document.main);
     document.main.addEventListener("scroll", () => {
         DropdownHandler.dropdownClear();
-        HoverHandler.resetIndicate(false);
+        HoverHandler.resetIndicate();
     });
 
     /*>---------- [ Initialize Mode Change ] ----------<*/
-    toggleMode.addEventListener("click", (event) => {
+    const btnMode = (event) => {
         //Determine Mode
-        const { currentTarget } = event;
-        const btnState = currentTarget.innerText === "Edit";
+        const { currentTarget, reset } = event;
+        const btnState = reset ? false : currentTarget.innerText === "Edit";
         currentTarget.innerText = btnState ? "Reorder" : "Edit";
 
         //Clear utils
@@ -87,7 +87,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             struct.draggable = btnState;
         for (const button of document.getElementsByClassName("addStructBtn"))
             button.hidden = btnState;
-    });
+    };
+    toggleMode.addEventListener("click", btnMode);
 
     /*>---------- [ Initialize Header Buttons ] ----------<*/
     const childUpload = dataUpload.firstElementChild;
@@ -113,6 +114,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 await DataHandler.clearAllData();
                 DataHandler.parseData(parsedData, externalBtn, true);
+                btnMode({currentTarget: toggleMode, reset: true});
             }
             catch (error) {
                 console.error("Error parsing file", error);
@@ -164,7 +166,7 @@ class DropdownHandler {
 
                 dropdown.addEventListener("mouseleave", DropdownHandler.dropdownClear);
                 dropdown.firstElementChild.addEventListener("input", (event) => {
-                    const textInput = event.currentTarget.value.toLowerCase();
+                    const textInput = event.currentTarget.value.toLowerCase().replace(/ /g, "-");
                     [...dropdownList.children].forEach(async (icon) =>
                         icon.hidden = !icon.lastElementChild.textContent.toLowerCase().includes(textInput));
                 });
@@ -179,10 +181,11 @@ class DropdownHandler {
         DropdownHandler.#dropdownIcon.hidden = active;
 
         const rectClient = currentTarget.getBoundingClientRect();
-        const rectDropdown = DropdownHandler.#dropdownIcon.getBoundingClientRect();
-        DropdownHandler.#dropdownIcon.style.transform = `translateY(${window.screen.height < rectClient.bottom + rectDropdown.height
-            ? rectClient.top - rectDropdown.height - 10
-            : rectClient.bottom}px)`;
+        const { height } = DropdownHandler.#dropdownIcon.getBoundingClientRect();
+        DropdownHandler.#dropdownIcon.style.transform =
+            `translateY(${window.screen.height < rectClient.bottom + height
+                ? rectClient.top - height - 10
+                : rectClient.bottom}px)`;
 
         DropdownHandler.#dropdownIcon.client = active
             ? null
@@ -200,7 +203,8 @@ class PopupHandler {
         popup.addEventListener("mousedown", (event) => {
             if (event.target === popup) {
                 popup.hidden = true;
-                PopupHandler.#popupInfo.client = null;
+                requestAnimationFrame(() =>
+                    PopupHandler.#popupInfo.client = null);
             }
         });
 

@@ -137,24 +137,24 @@ class HoverHandler {
             transition: "none"
         });
 
-        HoverHandler.#selectedStruct = null;
-        HoverHandler.#indStruct.classList.toggle("dragStruct", dragging);
+        if (typeof dragging === "boolean") {
+            HoverHandler.#selectedStruct = null;
+            HoverHandler.#indStruct.classList.toggle("dragStruct", dragging);
+        }
     }
 
     static #hoverStruct(event) {
         event.stopPropagation();
         const { target } = event;
-        if (HoverHandler.#selectedStruct || !target.draggable)
+        if (!HoverHandler.#selectedStruct && !target.draggable)
             return;
 
         const rect = target.getBoundingClientRect();
-        const styleValues = target === HoverHandler.#selectedStruct
-            ? { width: "0", height: "0", transition: "none" }
-            : { width: `${rect.width}px`, height: `${rect.height}px`, transition: "" };
-
         Object.assign(HoverHandler.#indStruct.style, {
             transform: `translate(${rect.left}px, ${rect.top}px)`,
-            ...styleValues
+            width: `${rect.width}px`,
+            height: `${rect.height}px`,
+            transition: ""
         });
     }
 
@@ -184,7 +184,7 @@ class HoverHandler {
         if (target.id === "deleteStruct")
             return target.appendChild(HoverHandler.#indStruct);
 
-        if (!target.draggable)
+        if (!target.draggable && target.localName !== "main")
             return;
 
         const { selectedName, parentName } = HoverHandler.#selectedStruct;
@@ -202,11 +202,13 @@ class HoverHandler {
             );
         }
 
-        const { top, bottom } = nextElementSibling?.getBoundingClientRect();
-        if (clientY < bottom && clientY > Math.min(
-            previousElementSibling?.getBoundingClientRect().top,
-            HoverHandler.#indStruct.getBoundingClientRect().top,
-            top))
+        const rectNext = nextElementSibling?.localName === selectedName
+            ? nextElementSibling.getBoundingClientRect()
+            : null;
+        if (clientY < rectNext?.bottom && clientY > Math.min(
+            previousElementSibling?.localName === selectedName ? previousElementSibling.getBoundingClientRect().top : Infinity,
+            HoverHandler.#indStruct.getBoundingClientRect().top - 1,
+            rectNext?.top - 1 || Infinity))
             return;
 
         if (parentName === target.localName) 
