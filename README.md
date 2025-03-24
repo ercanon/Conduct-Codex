@@ -34,7 +34,7 @@ Clicking twice on an entry will open the popup, which includes a text input area
 Drag and drop an element to a new position to reorder it, or drop it inside the *bin button* at the bottom of the screen to delete it.
 
 ### Gist
-Download the data file using the *Export data file* option and upload it to [GitHub Gist](https://gist.github.com).  
+Download the data file using the *Export data file* option and upload it publicly to [GitHub Gist](https://gist.github.com).  
 After *#gistID=*, insert the Gist ID found at the end of the Gist URL to load the data. Share the resulting URL to activate *Viewer Mode*.
 
 ### Viewer Mode

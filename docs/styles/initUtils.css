@@ -53,8 +53,8 @@ input {
 body {
     display: flex;
     flex-direction: column;
-    width: 100vw;
-    height: 100vh;
+    width: 100svw;
+    height: 100svh;
     overflow: hidden;
 }
 
@@ -64,9 +64,9 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100vw;
-    height: 100vh;
-    padding: 5vh 10vw;
+    width: 100%;
+    height: 100%;
+    padding: 5% 10%;
     box-sizing: border-box;
     background-color: rgb(65, 65, 65, .65);
     animation: fade-in .3s ease forwards;
@@ -172,7 +172,7 @@ body {
 /*>--------------- { Dropdown } ---------------<*/
 #dropdownIcon {
     position: absolute;
-    width: calc(100vw - (15px * 2)); /*width - margin*/
+    width: calc(100% - (15px * 2)); /*width - margin*/
     align-self: center;
     margin-block: var(--tightSpaceLyt);
     border: 1px solid var(--black);
@@ -204,7 +204,7 @@ body {
         word-wrap: break-word;
         overflow-y: auto;
         overflow-x: hidden;
-        height: 25vh;
+        height: 25svh;
     }
 
         #dropdownIcon > span figure:hover {
@@ -219,8 +219,8 @@ body {
 /*>--------------- { Delete Struct } ---------------<*/
 #deleteStruct {
     position: absolute;
-    width: 20vw;
-    height: 4.5vh;
+    width: 20%;
+    height: 4.5%;
     bottom: var(--looseSpaceLyt);
     background: var(--red);
     color: var(--white);
@@ -230,7 +230,7 @@ body {
     z-index: 900;
 }
     #deleteStruct[data-mode="Edit"] {
-        bottom: -10vh;
+        bottom: -10svh;
     }
     #deleteStruct::before {
         content: "";
@@ -251,17 +251,17 @@ body {
     }
     #deleteStruct:has(>.dragStruct) {
         background-color: var(--redHvr);
-        width: 30vw;
-        height: 7vh;
+        width: 30svw;
+        height: 7svh;
     }
 @media (max-width: 700px) {
     #deleteStruct {
-        width: 25vw;
-        height: 7vh;
+        width: 25svw;
+        height: 7svh;
     }
         #deleteStruct:has(>.dragStruct) {
-            width: 35vw;
-            height: 10vh;
+            width: 35svw;
+            height: 10svh;
         }
 }
 
