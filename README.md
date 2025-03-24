@@ -15,6 +15,7 @@ Feel free to follow me to stay updated on my future projects!
 - Edit, reorder and view mode.
 - Markdown support for popup information.
 - Selector of [game-icons.net](https://game-icons.net) icons.
+- Frontend-only.
 
 ## Controls
 ### Header
