@@ -183,7 +183,7 @@ class DropdownHandler {
         const rectClient = currentTarget.getBoundingClientRect();
         const { height } = DropdownHandler.#dropdownIcon.getBoundingClientRect();
         DropdownHandler.#dropdownIcon.style.transform =
-            `translateY(${window.screen.height < rectClient.bottom + height
+            `translateY(${window.innerHeight < rectClient.bottom + height
                 ? rectClient.top - height - 10
                 : rectClient.bottom}px)`;
 

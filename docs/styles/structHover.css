@@ -45,7 +45,7 @@ section.dynStruct > .section-title {
 }
 
 section.dynStruct > .section-usage {
-    min-width: 20vw;
+    min-width: 20svw;
     color: var(--white);
     text-align: right;
     font-size: 1.05rem;
