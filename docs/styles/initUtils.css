@@ -24,10 +24,6 @@
     }
 }
 
-*[hidden] {
-    display: none !important;
-}
-
 button {
     border: none;
     border-radius: var(--tightSpaceLyt);
@@ -340,6 +336,13 @@ main {
     background: var(--white);
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+
+
+/*>--------------- { Dinamic Class } ---------------<*/
+*[hidden] {
+    display: none !important;
 }
 
 
