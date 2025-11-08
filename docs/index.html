@@ -24,6 +24,15 @@
 <body>
     <!--Utils-->
     <span id="deleteStruct" data-mode="Edit"></span>
+    <div id="popupClear" hidden>
+        <div>
+            <h2>Are you sure you want to clear all data?</h2>
+            <span>
+                <button>Clear</button>
+                <button>Cancel</button>
+            </span>
+        </div>
+    </div>
     <div id="popupInfo" hidden>
         <textarea id="infoInput" placeholder="Write in Markdown(.md)..."></textarea>
         <section>
@@ -43,6 +52,7 @@
         <button id="toggleMode" data-mode="Edit"> Edit </button>
         <button id="dataUpload"> <input type="file" accept=".kprl" hidden> </button>
         <button id="dataDownload"> <a download="ConductCodex_data.kprl" hidden></a></button>
+        <button id="dataClear"> </button>
     </header>
 
     <!--Web Contents-->

@@ -1,6 +1,6 @@
 /*>--------------- { Web Initialization } ---------------<*/
 document.addEventListener("DOMContentLoaded", async () => {
-    document.main = document.body.querySelector("main");
+    document.main = document.body.getElementsByTagName("main")[0];
     window.urlSearch = new URLSearchParams(window.location.hash.substring(1));
     DataHandler.gistID = window.urlSearch.get("gistID");
 
@@ -28,9 +28,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const elemList = [
         "toggleMode",
         "dataUpload",
+        "dataClear",
         "dropdownIcon",
         "indStruct",
         "deleteStruct",
+        "popupClear",
         "infoInput"
     ].reduce((obj, id) => {
         obj[id] = document.getElementById(id);
@@ -53,9 +55,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const {
         toggleMode,
         dataUpload,
+        dataClear,
         dropdownIcon,
         indStruct,
-        deleteStruct
+        deleteStruct,
+        popupClear
     } = elemList;
 
     HoverHandler.prepareHover(document.main, indStruct);
@@ -123,6 +127,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         reader.onerror = (error) => {
             console.error("Error reading file", error);
         };
+    });
+
+    dataClear.addEventListener("click", () => {
+        popupClear.hidden = false;
+    });
+    const [clearBtn, cancelBtn] = popupClear.getElementsByTagName("button");
+    clearBtn.addEventListener("click", async () => {
+        await DataHandler.clearAllData();
+        location.reload();
+    });
+    cancelBtn.addEventListener("click", () => {
+        popupClear.hidden = true;
     });
 });
 
