@@ -6,8 +6,6 @@ Many thanks to [Crobi](https://github.com/crobi) for creating [dnd5e-quickref](h
 
 Feel free to follow me to stay updated on my future projects!
 
----
-
 ## Features  
 - Import and export data files.
 - GitHub Gist loader on startup if the ID was provided in the URL.
@@ -17,8 +15,12 @@ Feel free to follow me to stay updated on my future projects!
 - Selector of [game-icons.net](https://game-icons.net) icons.
 - Frontend-only.
 
-## Controls
-### Header
+---
+
+<details>
+<summary><strong> Controls </strong></summary>
+
+  ### Header
 - Change mode between Edit and Reorder button.
 - Import data file.
 - Export data file.
@@ -40,12 +42,23 @@ After *#gistID=*, insert the Gist ID found at the end of the Gist URL to load th
 
 ### Viewer Mode
 Click on an entry to open its information popup.
+</details>
 
-## Dependencies 
+---
+
+<details>
+<summary><strong> Dependencies </strong></summary>
+  
 - [Github Gist](https://gist.github.com)
 - [game-icons.net](https://game-icons.net)
 - [Iconify Design](https://iconify.design)
 - [Marked](https://marked.js.org)
+</details>
 
-## Examples
+---
+
+<details>
+<summary><strong> Examples </strong></summary>
+  
 - [5eRules2014](https://ercanon.github.io/Conduct-Codex/#gistID=20d64ce7b0c1c624ee82688dbd9114c0)
+</details>
