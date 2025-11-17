@@ -99,7 +99,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     dataUpload.addEventListener("click", (event) => {
         if (event.target.localName !== "button")
             return;
-        childUpload.click();
+        popupClear.action = async () =>
+            childUpload.click();
+        popupClear.hidden = false;
     });
     childUpload.addEventListener("change", async (event) => {
         const reader = new FileReader();
@@ -130,16 +132,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     dataClear.addEventListener("click", () => {
+        popupClear.action = async () => {
+            document.main.innerHTML = "";
+            await DataHandler.clearAllData();
+            StructureHandler.createStruct({ currentTarget: document.main });
+            btnMode({ currentTarget: toggleMode, reset: true });
+        }
         popupClear.hidden = false;
     });
     const [clearBtn, cancelBtn] = popupClear.getElementsByTagName("button");
     clearBtn.addEventListener("click", async () => {
-        await DataHandler.clearAllData();
-        location.reload();
+        if (typeof popupClear.action === "function") {
+            await popupClear.action();
+            popupClear.hidden = true;
+            return
+        }
+        console.error("Popup opened without action.");
     });
-    cancelBtn.addEventListener("click", () => {
-        popupClear.hidden = true;
-    });
+    cancelBtn.addEventListener("click", () =>
+        popupClear.hidden = true);
 });
 
 class DropdownHandler {

@@ -8,7 +8,7 @@ class StructureHandler {
             <input type="text" class="section-usage" placeholder="Usage">
          </section>`,
         `<article class="dynStruct">
-            <input type="text" class="article-type" placeholder="Entry Type">
+            <textarea class="article-type" placeholder="Entry Type" style="height: 21px"></textarea>
          </article>`,
         `<div class="dynStruct">
             <iconify-icon icon="material-symbols:add-2-rounded" width="unset" height="unset" noobserver></iconify-icon>
@@ -40,7 +40,7 @@ class StructureHandler {
             if (!storeData)
                 DataHandler.execData("put", [dynStruct.localName], { id: dynStruct.id, order: Date.now(), parent: parent.id });
 
-            for (const input of dynStruct.querySelectorAll(":scope > input")) {
+            for (const input of dynStruct.querySelectorAll(":scope > input, :scope > textarea")) {
                 const key = input.classList[0].split("-")[1]
                 if (!isHost) {
                     input.placeholder = "";
@@ -72,6 +72,15 @@ class StructureHandler {
                         newText.className = firstChild.className;
                         newText.textContent = firstChild.value;
                         firstChild.replaceWith(newText);
+                    }
+                    else {
+                        firstChild.addEventListener("input", () => {
+                            firstChild.style.height = "21px";
+                            firstChild.style.height = firstChild.scrollHeight + "px";
+                        });
+                        requestAnimationFrame(() => {
+                            firstChild.style.height = firstChild.scrollHeight + "px";
+                        });
                     }
                     break;
                 case "div":

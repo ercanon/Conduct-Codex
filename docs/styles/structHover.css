@@ -11,6 +11,7 @@
     cursor: grab;
 }
 .dynStruct[draggable="true"] > iconify-icon,
+.dynStruct[draggable="true"] > textarea,
 .dynStruct[draggable="true"] > input {
     pointer-events: none;
 }
@@ -29,7 +30,8 @@ section.dynStruct {
 
 section.dynStruct >.section-color {
     aspect-ratio: 1 / 1;
-    cursor: pointer;
+    cursor: pointer;  
+    height: 85%;
 }
     section.dynStruct > .section-color::-webkit-color-swatch-wrapper {
         border: 2px solid var(--greyHvr);
@@ -71,11 +73,14 @@ article.dynStruct {
     font-family: "Noto Sans", "Myriad Pro", Calibri, Helvetica, Arial, sans-serif;
 }
 
-article.dynStruct > .article-type {
-    grid-column: 1/-1;
-    font-size: 1.05rem;
-    font-style: italic;
-}
+    article.dynStruct > .article-type {
+        grid-column: 1/-1;
+        font-size: 1.05rem;
+        font-style: italic;
+        resize: none;
+        overflow: hidden;
+        white-space: pre-line
+    }
 
 
 
