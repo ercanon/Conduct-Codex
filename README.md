@@ -21,27 +21,29 @@ Feel free to follow me to stay updated on my future projects!
 <summary><strong> Controls </strong></summary>
 
   ### Header
-- Change mode between Edit and Reorder button.
-- Import data file.
+- Button to change mode between *Edit and Reorder Modes*.
+- Import data file. This clears actual data.
 - Export data file.
+- Clear actual data.
   
 ### Edit Mode
 Clicking the *+ button* will create a structure based on its hierarchy:
 1. __Section__: Contains its color, title, and usage inputs.
-2. __Article__: Where the type of entry can be defined.
+2. __Article__: Where the type of entry can be defined. Markdown can be used for improved style.
 3. __Entry__: Includes the icon, title, and subtitle.
    
 Clicking twice on an entry will open the popup, which includes a text input area. The markdown you write in this area will be parsed and displayed in the preview area.
 
 ### Reorder Mode
-Drag and drop an element to a new position to reorder it, or drop it inside the *bin button* at the bottom of the screen to delete it.
+Drag and drop an element to a new position to reorder it, or drop it inside the *bin area* at the bottom of the screen to delete it.
+This mode is also a preview to the *Viewwer Mode*.
 
 ### Gist
 Download the data file using the *Export data file* option and upload it publicly to [GitHub Gist](https://gist.github.com).  
-After *#gistID=*, insert the Gist ID found at the end of the Gist URL to load the data. Share the resulting URL to activate *Viewer Mode*.
+After *#gistID=* in the Conduct Codex URL, insert the Gist ID found at the end of the Gist URL to load the data. Share the resulting URL to activate *Viewer Mode*.
 
 ### Viewer Mode
-Click on an entry to open its information popup.
+Click once on an entry to open a popup that contains its information.
 </details>
 
 ---
@@ -61,4 +63,5 @@ Click on an entry to open its information popup.
 <summary><strong> Examples </strong></summary>
   
 - [5eRules2014](https://ercanon.github.io/Conduct-Codex/#gistID=20d64ce7b0c1c624ee82688dbd9114c0)
+- [My 5e Rules](https://ercanon.github.io/Conduct-Codex/#gistID=d9778b737b688bd4d8f0d6bad02dde56)
 </details>
