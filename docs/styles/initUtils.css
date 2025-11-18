@@ -130,41 +130,6 @@ body {
     font-size: 1.05rem;
     font-family: "Noto Sans", "Myriad Pro", Calibri, Helvetica, Arial, sans-serif;
 }
-    #popupInfo span > * {
-        margin-bottom: .5rem;
-    }
-    #popupInfo span > *:last-child {
-        margin-bottom: 0;
-    }
-    #popupInfo span h1 {
-        font-size: 1.8rem;
-    }
-    #popupInfo span blockquote {
-        background-color: var(--greyHvr);
-        padding-left: .5rem;
-        border: 1px solid var(--grey);
-        border-left: var(--spaceLyt) solid var(--grey);
-        border-radius: var(--tightSpaceLyt);
-        margin: .2rem;
-    }
-    #popupInfo span > blockquote {
-        margin-bottom: .5rem;
-    }
-    #popupInfo span ol,
-    #popupInfo span ul {
-        margin-left: 1.2rem;
-    }
-    #popupInfo span code {
-        background-color: var(--greyHvr);
-        padding: var(--tightSpaceLyt);
-        border-radius: var(--tightSpaceLyt);
-    }
-    #popupInfo span table {
-        border-spacing: 1rem .6rem;
-    }
-    #popupInfo span hr {
-        margin-block: .7rem;
-    }
 
 #popupClear > div {
     position: absolute;
@@ -173,13 +138,14 @@ body {
     background-color: var(--whiteHvr);
     border-radius: var(--spaceLyt);
     animation: zoom-in .3s ease forwards;
+    font-family: "Noto Sans", "Myriad Pro", Calibri, Helvetica, Arial, sans-serif;
 }
 
 #popupClear button {
     padding: var(--spaceLyt) var(--looseSpaceLyt);
     margin: var(--looseSpaceLyt);
     margin-bottom: 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: var(--white);
     transition: background-color .3s ease;
 }
@@ -292,6 +258,50 @@ body {
             width: 35svw;
             height: 10svh;
         }
+}
+
+/*>--------------- { Parse Style } ---------------<*/
+.parsed-md > * {
+    margin-bottom: .5rem;
+}
+    .parsed-md > *:last-child {
+        margin-bottom: 0;
+    }
+
+.parsed-md h1 {
+    font-size: 1.8rem;
+}
+
+.parsed-md blockquote {
+    background-color: var(--greyHvr);
+    padding-left: .5rem;
+    border: 1px solid var(--grey);
+    border-left: var(--spaceLyt) solid var(--grey);
+    border-radius: var(--tightSpaceLyt);
+    margin: .2rem;
+}
+
+.parsed-md > blockquote {
+    margin-bottom: .5rem;
+}
+
+.parsed-md ol,
+.parsed-md ul {
+    margin-left: 1.2rem;
+}
+
+.parsed-md code {
+    background-color: var(--greyHvr);
+    padding: var(--tightSpaceLyt);
+    border-radius: var(--tightSpaceLyt);
+}
+
+.parsed-md table {
+    border-spacing: 1rem .6rem;
+}
+
+.parsed-md hr {
+    margin-block: .7rem;
 }
 
 /*>--------------- { Banner } ---------------<*/
