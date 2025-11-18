@@ -9,6 +9,7 @@ class StructureHandler {
          </section>`,
         `<article class="dynStruct">
             <textarea class="article-type" placeholder="Entry Type" style="height: 21px"></textarea>
+            <span class="article-type parsed-md" hidden></span>
          </article>`,
         `<div class="dynStruct">
             <iconify-icon icon="material-symbols:add-2-rounded" width="unset" height="unset" noobserver></iconify-icon>
@@ -18,7 +19,7 @@ class StructureHandler {
     ];
 
     static createStruct(event) {
-        const isHost = !DataHandler.gistID;
+        document.isHost = !DataHandler.gistID;
         const { currentTarget, storeData } = event;
 
         const parent = currentTarget.localName === "button"
@@ -28,12 +29,12 @@ class StructureHandler {
             struct.substring(0, 10).includes(parent.localName === "main"
                 ? currentTarget.localName
                 : parent.localName));
-        const newDOM = StructureHandler.#parserDOM.createContextualFragment(StructureHandler.#structArray[lvl <= 0 && !isHost ? lvl + 1 : lvl])
+        const newDOM = StructureHandler.#parserDOM.createContextualFragment(StructureHandler.#structArray[lvl <= 0 && !document.isHost ? lvl + 1 : lvl])
 
         /*>---------- [ Set Struct ] ----------<*/
         const dynStruct = newDOM.querySelector(".dynStruct");
         if (dynStruct) {
-            if (isHost && lvl < StructureHandler.#structArray.length - 1) //Button Insertion
+            if (document.isHost && lvl < StructureHandler.#structArray.length - 1) //Button Insertion
                 dynStruct.insertAdjacentHTML("beforeend", StructureHandler.#structArray[0]);
 
             dynStruct.id = storeData?.id || DataHandler.randomUUIDv4();
@@ -42,7 +43,7 @@ class StructureHandler {
 
             for (const input of dynStruct.querySelectorAll(":scope > input, :scope > textarea")) {
                 const key = input.classList[0].split("-")[1]
-                if (!isHost) {
+                if (!document.isHost) {
                     input.placeholder = "";
                     dynStruct.localName === "section"
                         ? input.disabled = true
@@ -63,30 +64,30 @@ class StructureHandler {
                 case "section":
                     firstChild.addEventListener("input", StructureHandler.#changeColor);
                     firstChild.dispatchEvent(new Event("input"));
-                    if (!isHost)
+                    if (!document.isHost)
                         firstChild.remove();
                     break;
                 case "article":
-                    if (!isHost) {
-                        const newText = document.createElement("p");
-                        newText.className = firstChild.className;
-                        newText.textContent = firstChild.value;
-                        firstChild.replaceWith(newText);
+                    if (!document.isHost) {
+                        firstChild.hidden = true;
+                        Object.assign(firstChild.nextElementSibling, {
+                            hidden: false,
+                            innerHTML: DataHandler.parseMD(firstChild.value)
+                        });
                     }
-                    else {
+                    else 
                         firstChild.addEventListener("input", () => {
                             firstChild.style.height = "21px";
                             firstChild.style.height = firstChild.scrollHeight + "px";
                         });
-                        requestAnimationFrame(() => {
-                            firstChild.style.height = firstChild.scrollHeight + "px";
-                        });
-                    }
+                    requestAnimationFrame(() => {
+                        firstChild.style.height = firstChild.scrollHeight + "px";
+                    });
                     break;
                 case "div":
-                    dynStruct.addEventListener(isHost ? "dblclick" : "click", PopupHandler.openPopup);
+                    dynStruct.addEventListener(document.isHost ? "dblclick" : "click", PopupHandler.openPopup);
                     dynStruct.rawMD = storeData?.rawMD || "";
-                    isHost
+                    document.isHost
                         ? firstChild.addEventListener("click", DropdownHandler.dropdownCall)
                         : firstChild.style.setProperty("pointer-events", "none");
                     if (storeData?.icon)
@@ -99,7 +100,7 @@ class StructureHandler {
         newDOM.querySelector(".addStructBtn")?.addEventListener("click", StructureHandler.createStruct);
 
         /*>---------- [ Insert into HTML ] ----------<*/
-        parent[isHost ? "insertBefore" : "appendChild"](newDOM, parent.lastElementChild);
+        parent[document.isHost ? "insertBefore" : "appendChild"](newDOM, parent.lastElementChild);
 
         return dynStruct;
     }

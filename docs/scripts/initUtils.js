@@ -87,8 +87,22 @@ document.addEventListener("DOMContentLoaded", async () => {
             elem.setAttribute("data-mode", currentTarget.innerText);
 
         //Change Mode Elements
-        for (const struct of document.getElementsByClassName("dynStruct"))
+        for (const struct of document.getElementsByClassName("dynStruct")) {
             struct.draggable = btnState;
+
+            const firstChild = struct.firstElementChild;
+            switch (struct.localName) {
+                case "section":
+                    firstChild.hidden = btnState;
+                    break;
+                case "article":
+                    firstChild.hidden = btnState;
+                    firstChild.nextElementSibling.hidden = !btnState;
+                    if (btnState) 
+                        firstChild.nextElementSibling.innerHTML = DataHandler.parseMD(firstChild.value)
+                    break;
+            }
+        }
         for (const button of document.getElementsByClassName("addStructBtn"))
             button.hidden = btnState;
     };

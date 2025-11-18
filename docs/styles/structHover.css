@@ -16,6 +16,11 @@
     pointer-events: none;
 }
 
+.dynStruct[draggable="true"] input::placeholder,
+.dynStruct[draggable="true"] textarea::placeholder {
+    color: transparent;
+}
+
 
 
 section.dynStruct {
@@ -79,7 +84,6 @@ article.dynStruct {
         font-style: italic;
         resize: none;
         overflow: hidden;
-        white-space: pre-line
     }
 
 
