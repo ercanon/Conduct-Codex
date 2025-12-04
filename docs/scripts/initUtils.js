@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         requestAnimationFrame(() =>
             URL.revokeObjectURL(url));
-
     });
 
     /*>---------- [ Initialize Client ] ----------<*/
@@ -166,8 +165,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     cancelBtn.addEventListener("click", () =>
         popupClear.hidden = true);
-
-    GistHandler.setGistCnx();
 });
 
 class DropdownHandler {
@@ -414,46 +411,5 @@ class DataHandler {
         return [...array].map((byte, i) =>
             [4, 6, 8, 10].includes(i) ? `-${byte.toString(16).padStart(2, '0')}` : byte.toString(16).padStart(2, '0')
         ).join('');
-    }
-}
-
-class GistHandler {
-    static #clientID = "Ov23likUB84fRE7sVbWO";
-    static #redirectURI = "https://ercanon.github.io/Conduct-Codex/";
-    static #scope = "gist";
-
-    static async setGistCnx() {
-        const code_verifier = GistHandler.#randomString();
-        const code_challenge = await GistHandler.#sha256(code_verifier);
-
-        sessionStorage.setItem("code_verifier", code_verifier);
-
-        const authURL =
-            "https://github.com/login/oauth/authorize" +
-            `?client_id=${GistHandler.#clientID}` +
-            `&redirect_uri=${encodeURIComponent(GistHandler.#redirectURI)}` +
-            `&scope=${GistHandler.#scope}` +
-            `&response_type=code` +
-            `&code_challenge=${code_challenge}` +
-            `&code_challenge_method=S256`;
-
-        window.location = authURL;
-    }
-
-    static #base64urlencode(arrayBuffer) {
-        return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
-            .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    }
-    static async #sha256(str) {
-        const data = new TextEncoder().encode(str);
-        const digest = await crypto.subtle.digest("SHA-256", data);
-        return GistHandler.#base64urlencode(digest);
-    }
-    static #randomString(length = 64) {
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        let out = "";
-        for (let i = 0; i < length; i++)
-            out += chars.charAt(Math.floor(Math.random() * chars.length));
-        return out;
     }
 }
