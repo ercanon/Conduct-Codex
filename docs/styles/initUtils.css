@@ -298,9 +298,14 @@ body {
 
 .parsed-md table {
     border-spacing: 1rem .6rem;
+    text-align: initial;
 }
 
 .parsed-md hr {
+    width: 100%;
+    border: 0;
+    height: 2px;
+    background: var(--black);
     margin-block: .7rem;
 }
 

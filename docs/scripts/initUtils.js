@@ -1,4 +1,4 @@
-﻿/*>--------------- { Web Initialization } ---------------<*/
+/*>--------------- { Web Initialization } ---------------<*/
 document.addEventListener("DOMContentLoaded", async () => {
     document.main = document.body.getElementsByTagName("main")[0];
     window.urlSearch = new URLSearchParams(window.location.hash.substring(1));
@@ -25,19 +25,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     /*>---------- [ Initialize Client ] ----------<*/
-    const elemList = [
-        "toggleMode",
-        "dataUpload",
-        "dataClear",
-        "dropdownIcon",
-        "indStruct",
-        "deleteStruct",
-        "popupClear",
-        "infoInput"
-    ].reduce((obj, id) => {
-        obj[id] = document.getElementById(id);
-        return obj;
-    }, {});
+    const elemList = Object.fromEntries(
+        Array.from(document.querySelectorAll("[init-hdl]"))
+            .map(elem => [elem.id, elem])
+    );
 
     if (DataHandler.gistID) {
         for (const elem of Object.values(elemList))
@@ -165,15 +156,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     cancelBtn.addEventListener("click", () =>
         popupClear.hidden = true);
-
-    googleTokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: "563023526385-1k7lklruh9kkhiep8jo7uldbultg0ab4.apps.googleusercontent.com",
-        scope: "https://www.googleapis.com/auth/drive.file",
-        callback: (response) => {
-            accessToken = response.access_token;
-            console.log("Token recibido:", accessToken);
-            alert("Sesión iniciada correctamente");
-        }
 });
 
 class DropdownHandler {

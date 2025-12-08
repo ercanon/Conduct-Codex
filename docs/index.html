@@ -11,7 +11,6 @@
 
     <!--Lib-->
     <!--<script src="https://cdn.jsdelivr.net/npm/fflate/umd/index.min.js"></script>-->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <!--Style-->
@@ -24,8 +23,8 @@
 </head>
 <body>
     <!--Utils-->
-    <span id="deleteStruct" data-mode="Edit"></span>
-    <div id="popupClear" hidden>
+    <span init-hdl id="deleteStruct" data-mode="Edit"></span>
+    <div init-hdl id="popupClear" hidden>
         <div>
             <h2>Are you sure you want to clear previous data?</h2>
             <span>
@@ -35,14 +34,14 @@
         </div>
     </div>
     <div id="popupInfo" hidden>
-        <textarea id="infoInput" placeholder="Write in Markdown(.md)..."></textarea>
+        <textarea init-hdl id="infoInput" placeholder="Write in Markdown(.md)..."></textarea>
         <section>
             <h1 data-title="entry-title"></h1>
             <h2 data-title="section-title"></h2>
             <span class="parsed-md"></span>             
         </section>
     </div>
-    <div id="dropdownIcon" hidden>
+    <div init-hdl id="dropdownIcon" hidden>
         <input type="text" placeholder="Search icons...">
         <span></span>
     </div>
@@ -50,16 +49,16 @@
     <!--Banner-->
     <header>
         <h1>Conduct Codex</h1>
-        <button id="toggleMode" data-mode="Edit"> Edit </button>
-        <button id="dataUpload"> <input type="file" accept=".kprl" hidden> </button>
+        <button init-hdl id="toggleMode" data-mode="Edit"> Edit </button>
+        <button init-hdl id="dataUpload"> <input type="file" accept=".kprl" hidden> </button>
         <button id="dataDownload"> <a download="ConductCodex_data.kprl" hidden></a></button>
-        <button id="dataClear"> </button>
+        <button init-hdl id="dataClear"> </button>
     </header>
 
     <!--Web Contents-->
     <main id="main"></main>
 
     <!--Indicator Overlay-->
-    <span id="indStruct"></span>
+    <span init-hdl id="indStruct"></span>
 </body>
 </html>
