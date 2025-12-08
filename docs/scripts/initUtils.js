@@ -1,4 +1,4 @@
-/*>--------------- { Web Initialization } ---------------<*/
+﻿/*>--------------- { Web Initialization } ---------------<*/
 document.addEventListener("DOMContentLoaded", async () => {
     document.main = document.body.getElementsByTagName("main")[0];
     window.urlSearch = new URLSearchParams(window.location.hash.substring(1));
@@ -165,6 +165,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     cancelBtn.addEventListener("click", () =>
         popupClear.hidden = true);
+
+    googleTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: "563023526385-1k7lklruh9kkhiep8jo7uldbultg0ab4.apps.googleusercontent.com",
+        scope: "https://www.googleapis.com/auth/drive.file",
+        callback: (response) => {
+            accessToken = response.access_token;
+            console.log("Token recibido:", accessToken);
+            alert("Sesión iniciada correctamente");
+        }
 });
 
 class DropdownHandler {
